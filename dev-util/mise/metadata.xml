@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="fish-completion">
+			Install fish completion script (requires dev-util/usage at runtime)
+		</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/jdx/mise/issues</bugs-to>
+		<remote-id type="github">jdx/mise</remote-id>
+		<remote-id type="crates">mise</remote-id>
+	</upstream>
+</pkgmetadata>
