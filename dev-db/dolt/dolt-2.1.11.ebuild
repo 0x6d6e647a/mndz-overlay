@@ -8,7 +8,7 @@ inherit go-module
 DESCRIPTION="Dolt – Git for Data"
 HOMEPAGE="https://github.com/dolthub/dolt"
 SRC_URI="https://github.com/dolthub/dolt/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/dolt-2.1.6/dolt-2.1.6-vendor.tar.xz"
+SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/dolt-${PV}/dolt-${PV}-vendor.tar.xz"
 
 LICENSE="Apache-2.0"
 SLOT="0"
