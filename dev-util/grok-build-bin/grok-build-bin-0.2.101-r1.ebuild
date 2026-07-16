@@ -5,14 +5,14 @@ EAPI=8
 
 inherit shell-completion
 
-DESCRIPTION="xAI Grok command line interface (prebuilt binary)"
-HOMEPAGE="https://x.ai/cli"
+DESCRIPTION="SpaceXAI coding agent harness and TUI (prebuilt binary)"
+HOMEPAGE="https://x.ai/cli https://github.com/xai-org/grok-build"
 SRC_URI="
 	amd64? ( https://x.ai/cli/grok-${PV}-linux-x86_64 -> grok-${PV}-linux-amd64 )
 	arm64? ( https://x.ai/cli/grok-${PV}-linux-aarch64 -> grok-${PV}-linux-arm64 )
 "
 
-LICENSE="all-rights-reserved"
+LICENSE="Apache-2.0"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~arm64"
 IUSE="bash-completion fish-completion zsh-completion"

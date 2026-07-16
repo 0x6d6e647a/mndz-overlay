@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
+	<!-- maintainer-needed -->
 	<upstream>
-		<bugs-to>https://x.ai/cli</bugs-to>
+		<bugs-to>https://github.com/xai-org/grok-build/issues</bugs-to>
+		<remote-id type="github">xai-org/grok-build</remote-id>
 		<remote-id type="website">https://x.ai/cli</remote-id>
 	</upstream>
 </pkgmetadata>
