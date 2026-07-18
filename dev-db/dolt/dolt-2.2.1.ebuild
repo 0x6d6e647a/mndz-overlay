@@ -5,6 +5,8 @@ EAPI=8
 
 inherit go-module
 
+BDEPEND=">=dev-lang/go-1.26.2:="
+
 DESCRIPTION="Dolt – Git for Data"
 HOMEPAGE="https://github.com/dolthub/dolt"
 SRC_URI="https://github.com/dolthub/dolt/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
