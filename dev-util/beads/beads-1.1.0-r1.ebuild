@@ -5,6 +5,8 @@ EAPI=8
 
 inherit go-module
 
+BDEPEND=">=dev-lang/go-1.26.2:="
+
 DESCRIPTION="bd – Beads: Distributed graph issue tracker for AI agents"
 HOMEPAGE="https://github.com/gastownhall/beads"
 SRC_URI="https://github.com/gastownhall/beads/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
