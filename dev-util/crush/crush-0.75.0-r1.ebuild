@@ -14,7 +14,7 @@ SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/c
 
 LICENSE="FSL-1.1-MIT"
 SLOT="0"
-KEYWORDS="~amd64 ~arm64"
+KEYWORDS="~amd64"
 
 src_compile() {
 	export CGO_ENABLED=0
