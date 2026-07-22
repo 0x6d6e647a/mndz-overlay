@@ -1,0 +1,14 @@
+BDEPEND=>=dev-lang/bun-bin-1.3.6
+DEFINED_PHASES=compile install test unpack
+DESCRIPTION=AI Agent Loop Orchestrator TUI
+EAPI=8
+HOMEPAGE=https://github.com/subsy/ralph-tui
+INHERIT=shell-completion
+IUSE=test
+KEYWORDS=~amd64 ~arm64
+LICENSE=MIT
+RDEPEND=>=dev-lang/bun-bin-1.3.6
+SLOT=0
+SRC_URI=https://github.com/subsy/ralph-tui/archive/refs/tags/v0.12.0.tar.gz -> ralph-tui-0.12.0.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/ralph-tui-0.12.0/ralph-tui-0.12.0-deps.tar.xz
+_eclasses_=shell-completion	63a62de3ca49c798ee6e89f190e45d0e	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=ba6b47c883009513d59825768931ecd1
