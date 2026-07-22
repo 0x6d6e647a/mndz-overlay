@@ -8,6 +8,6 @@ KEYWORDS=-* ~amd64 ~arm64
 LICENSE=Apache-2.0
 RESTRICT=mirror strip bindist
 SLOT=0
-SRC_URI=amd64? ( https://x.ai/cli/grok-0.2.106-linux-x86_64 -> grok-0.2.106-linux-amd64 ) arm64? ( https://x.ai/cli/grok-0.2.106-linux-aarch64 -> grok-0.2.106-linux-arm64 )
+SRC_URI=amd64? ( https://x.ai/cli/grok-0.2.111-linux-x86_64 -> grok-0.2.111-linux-amd64 ) arm64? ( https://x.ai/cli/grok-0.2.111-linux-aarch64 -> grok-0.2.111-linux-arm64 )
 _eclasses_=shell-completion	63a62de3ca49c798ee6e89f190e45d0e	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
 _md5_=f6585c1f634a8eae4dc25a64926e8472
