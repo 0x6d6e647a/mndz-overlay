@@ -1,0 +1,14 @@
+BDEPEND=>=net-libs/nodejs-20.19.0[npm]
+DEFINED_PHASES=install unpack
+DESCRIPTION=AI-native system for spec-driven development
+EAPI=8
+HOMEPAGE=https://github.com/Fission-AI/OpenSpec
+INHERIT=shell-completion
+IUSE=bash-completion fish-completion zsh-completion
+KEYWORDS=amd64 arm arm64 ~loong ppc64 ~riscv ~x64-macos x86
+LICENSE=MIT
+RDEPEND=>=net-libs/nodejs-20.19.0[npm]
+SLOT=0
+SRC_URI=https://registry.npmjs.org/@fission-ai/openspec/-/openspec-1.6.0.tgz -> openspec-1.6.0.tgz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/openspec-1.6.0/openspec-1.6.0-deps.tar.xz
+_eclasses_=shell-completion	63a62de3ca49c798ee6e89f190e45d0e	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=010003fc83c4d1187d5f1ac2c37993d3
