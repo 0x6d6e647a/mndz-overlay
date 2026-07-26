@@ -22,7 +22,7 @@ src_unpack() {
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~loong ppc64 ~riscv ~x64-macos x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x64-macos ~x86"
 IUSE="bash-completion fish-completion zsh-completion"
 
 RDEPEND=">=net-libs/nodejs-20.19.0[npm]"
