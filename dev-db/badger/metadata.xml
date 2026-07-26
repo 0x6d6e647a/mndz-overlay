@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<upstream>
+		<bugs-to>https://github.com/dgraph-io/badger</bugs-to>
+		<remote-id type="github">dgraph-io/badger</remote-id>
+	</upstream>
+	<use>
+		<flag name="jemalloc">
+			Build and static-link a private jemalloc with the je_ prefix
+			(does not use dev-libs/jemalloc)
+		</flag>
+	</use>
+</pkgmetadata>
