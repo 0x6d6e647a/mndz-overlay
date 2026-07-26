@@ -22,7 +22,7 @@ LICENSE+="
 	Apache-2.0 BSD CDLA-Permissive-2.0 ISC MIT MPL-2.0 Unicode-3.0 ZLIB
 "
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~loong ~mips ppc ppc64 ~riscv ~s390 ~sparc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
 IUSE="bash-completion fish-completion zsh-completion"
 
 DEPEND="sys-libs/zlib"
