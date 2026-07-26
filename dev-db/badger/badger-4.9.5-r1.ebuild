@@ -21,7 +21,7 @@ SRC_URI="
 
 LICENSE="Apache-2.0 jemalloc? ( BSD-2 )"
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~loong ~mips ppc64 ~riscv ~s390 ~x64-macos ~x64-solaris x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc64 ~riscv ~s390 ~x64-macos ~x64-solaris ~x86"
 IUSE="bash-completion fish-completion jemalloc test zsh-completion"
 RESTRICT="!test? ( test )"
 
