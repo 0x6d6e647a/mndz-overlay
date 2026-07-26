@@ -24,7 +24,7 @@ LICENSE+="
 	|| ( CC0-1.0 MIT-0 )
 "
 SLOT="0"
-KEYWORDS="amd64 arm arm64 ~loong ~mips ppc ppc64 ~riscv ~s390 ~sparc x86"
+KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
 IUSE="bash-completion fish-completion zsh-completion"
 
 # System libs: match Arch/Alpine (system OpenSSL/zstd/bzip2/lua5.1,
