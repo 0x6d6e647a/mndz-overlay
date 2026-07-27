@@ -25,7 +25,8 @@ LICENSE+="
 "
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86"
-IUSE="bash-completion fish-completion zsh-completion"
+IUSE="bash-completion fish-completion test zsh-completion"
+RESTRICT="!test? ( test )"
 
 # System libs: match Arch/Alpine (system OpenSSL/zstd/bzip2/lua5.1,
 # disable default features: self_update + vendored-lua).
