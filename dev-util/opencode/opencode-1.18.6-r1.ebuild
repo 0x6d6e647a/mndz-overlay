@@ -17,10 +17,10 @@ SRC_URI="
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm64"
-IUSE="bash-completion +webui zsh-completion"
+IUSE="bash-completion test +webui zsh-completion"
 # Bun --compile embeds the app in ELF sections that strip destroys; after
 # strip the binary reports host Bun (e.g. 1.3.14) instead of OPENCODE_VERSION.
-RESTRICT="strip"
+RESTRICT="strip !test? ( test )"
 
 BDEPEND=">=dev-lang/bun-bin-1.3.14"
 RDEPEND="sys-apps/ripgrep"
@@ -66,4 +66,10 @@ src_install() {
 		SHELL=/bin/zsh "${ED}/usr/bin/opencode" completion > opencode.zsh || die
 		newzshcomp opencode.zsh _opencode
 	fi
+}
+
+src_test() {
+	# Upstream package suite; InstallTree deps already unpacked under ${S}.
+	cd packages/opencode || die
+	bun test --timeout 30000 --only-failures || die
 }
