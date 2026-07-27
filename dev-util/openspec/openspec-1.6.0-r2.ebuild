@@ -23,7 +23,8 @@ src_unpack() {
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~x64-macos ~x86"
-IUSE="bash-completion fish-completion zsh-completion"
+IUSE="bash-completion fish-completion test zsh-completion"
+RESTRICT="!test? ( test )"
 
 RDEPEND=">=net-libs/nodejs-20.19.0[npm]"
 BDEPEND="${RDEPEND}"
@@ -59,4 +60,19 @@ src_install() {
         newfishcomp openspec.fish openspec.fish
     use zsh-completion &&
         newzshcomp openspec.zsh _openspec
+}
+
+src_test() {
+    # Published npm package omits unit tests (files filter excludes them).
+    # Offline CLI smoke using the same deps cache layout as src_install.
+    export OPENSPEC_NO_COMPLETIONS=1
+    local prefix="${T}/openspec-test-prefix"
+    npm \
+        --offline \
+        --progress false \
+        --global \
+        --prefix "${prefix}/usr" \
+        --cache "${T}/npm-cache" \
+        install "${DISTDIR}/${P}.tgz" || die "npm install for tests failed"
+    "${prefix}/usr/bin/openspec" --help >/dev/null || die "openspec --help failed"
 }
