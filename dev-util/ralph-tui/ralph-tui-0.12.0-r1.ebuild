@@ -18,6 +18,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~arm64"
 
 IUSE="test"
+RESTRICT="!test? ( test )"
 
 BDEPEND=">=dev-lang/bun-bin-1.3.6"
 RDEPEND="${BDEPEND}"
@@ -42,7 +43,5 @@ src_install() {
 }
 
 src_test() {
-	if use test; then
-		bun test || die
-	fi
+	bun test || die
 }
