@@ -1,0 +1,15 @@
+BDEPEND=>=dev-lisp/sbcl-2.6.6:=[source] dev-libs/openssl:= sys-apps/bubblewrap dev-vcs/git || ( dev-lang/rust-bin dev-lang/rust ) virtual/pkgconfig
+DEFINED_PHASES=compile install prepare test unpack
+DESCRIPTION=Live, self-modifying Common Lisp AI agent
+EAPI=8
+HOMEPAGE=https://github.com/luciusmagn/autolith
+INHERIT=toolchain-funcs
+IUSE=test
+KEYWORDS=~amd64 ~ppc ~ppc64 ~riscv ~sparc ~x64-macos ~x86
+LICENSE=ISC
+RDEPEND=>=dev-lisp/sbcl-2.6.6:=[source] dev-libs/openssl:= sys-apps/bubblewrap dev-vcs/git
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://github.com/luciusmagn/autolith/archive/refs/tags/v0.32.2.tar.gz -> autolith-0.32.2.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/autolith-0.32.2/autolith-0.32.2-deps.tar.xz
+_eclasses_=toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=a7456469eb310a3210131e1159bf4bf8
