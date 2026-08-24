@@ -309,16 +309,17 @@ src_compile() {
 
 # shellcheck disable=SC2329
 src_install() {
+	local autolith_share="/usr/share/autolith"
 	local autolith_libdir="/usr/$(get_libdir)/autolith"
-	local libdir="${ED}${autolith_libdir}"
+	local sharedir="${ED}${autolith_share}"
 	local host_pv
 	host_pv=$(tr -d '[:space:]' < sbcl.version) || die
 
-	dodir "${autolith_libdir}"
-	# Install application tree (source + qlot + fabricated git).
-	cp -a "${S}/." "${libdir}/" || die
+	dodir "${autolith_share}"
+	# Arch-independent tree (Lisp, .qlot, fabricated git, scripts, launcher).
+	cp -a "${S}/." "${sharedir}/" || die
 
-	# Natives
+	# Architecture-specific natives
 	insinto "${autolith_libdir}/lib"
 	doins "${T}/natives/libfff_c.so"
 	doins "${T}/natives/libcolorlisp-tree-sitter.so"
@@ -333,13 +334,13 @@ src_install() {
 	doins "${T}/cores/active/autolith-active.core"
 	doins "${T}/cores/active/manifest.sexp"
 
-	# Synthetic SBCL source root under private prefix.
-	dodir "${autolith_libdir}/sbcl-source"
+	# Synthetic SBCL source root under the share dest.
+	dodir "${autolith_share}/sbcl-source"
 	printf '"%s"\n' "${host_pv}" \
-		> "${ED}${autolith_libdir}/sbcl-source/version.lisp-expr" || die
-	dosym -r "/usr/$(get_libdir)/sbcl/src" "${autolith_libdir}/sbcl-source/src"
+		> "${ED}${autolith_share}/sbcl-source/version.lisp-expr" || die
+	dosym -r "/usr/$(get_libdir)/sbcl/src" "${autolith_share}/sbcl-source/src"
 
-	# /usr/bin/autolith wrapper
+	# /usr/bin/autolith wrapper (two dests)
 	local wrapper="${T}/autolith-wrapper"
 	# Expand EPREFIX at install time (wrapper runs with set -u; EPREFIX is not
 	# defined in the user's shell). Runtime overrides still use \${VAR:-...}.
@@ -348,24 +349,25 @@ src_install() {
 # Gentoo mndz-overlay wrapper for Autolith ${PV}
 set -euo pipefail
 
-prefix="${EPREFIX}${autolith_libdir}"
+share="${EPREFIX}${autolith_share}"
+lib="${EPREFIX}${autolith_libdir}"
 export AUTOLITH_SBCL="\${AUTOLITH_SBCL:-${EPREFIX}/usr/bin/sbcl}"
-export AUTOLITH_SBCL_SOURCE_ROOT="\${AUTOLITH_SBCL_SOURCE_ROOT:-\${prefix}/sbcl-source}"
-export AUTOLITH_FFF_LIBRARY="\${AUTOLITH_FFF_LIBRARY:-\${prefix}/lib/libfff_c.so}"
-export COLORLISP_NATIVE_LIBRARY="\${COLORLISP_NATIVE_LIBRARY:-\${prefix}/lib/libcolorlisp-tree-sitter.so}"
-export CL_EXEC_SANDBOX_HELPER="\${CL_EXEC_SANDBOX_HELPER:-\${prefix}/libexec/cl-exec-sandbox-helper}"
+export AUTOLITH_SBCL_SOURCE_ROOT="\${AUTOLITH_SBCL_SOURCE_ROOT:-\${share}/sbcl-source}"
+export AUTOLITH_FFF_LIBRARY="\${AUTOLITH_FFF_LIBRARY:-\${lib}/lib/libfff_c.so}"
+export COLORLISP_NATIVE_LIBRARY="\${COLORLISP_NATIVE_LIBRARY:-\${lib}/lib/libcolorlisp-tree-sitter.so}"
+export CL_EXEC_SANDBOX_HELPER="\${CL_EXEC_SANDBOX_HELPER:-\${lib}/libexec/cl-exec-sandbox-helper}"
 export CL_EXEC_SANDBOX_BWRAP="\${CL_EXEC_SANDBOX_BWRAP:-\$(command -v bwrap)}"
-export AUTOLITH_RECOVERY_CORE="\${AUTOLITH_RECOVERY_CORE:-\${prefix}/cores/recovery/autolith-recovery.core}"
-export AUTOLITH_ACTIVE_CORE="\${AUTOLITH_ACTIVE_CORE:-\${prefix}/cores/active/autolith-active.core}"
+export AUTOLITH_RECOVERY_CORE="\${AUTOLITH_RECOVERY_CORE:-\${lib}/cores/recovery/autolith-recovery.core}"
+export AUTOLITH_ACTIVE_CORE="\${AUTOLITH_ACTIVE_CORE:-\${lib}/cores/active/autolith-active.core}"
 export AUTOLITH_INSTALLATION_KIND="\${AUTOLITH_INSTALLATION_KIND:-gentoo}"
 
-# Allow provenance git reads from the private prefix.
+# Allow provenance git reads from the share tree.
 export GIT_CONFIG_COUNT=1
 export GIT_CONFIG_KEY_0=safe.directory
-export GIT_CONFIG_VALUE_0="\${prefix}"
+export GIT_CONFIG_VALUE_0="\${share}"
 export GIT_OPTIONAL_LOCKS=0
 
-exec bash "\${prefix}/bin/autolith" "\$@"
+exec bash "\${share}/bin/autolith" "\$@"
 EOF
 	newbin "${wrapper}" autolith
 
