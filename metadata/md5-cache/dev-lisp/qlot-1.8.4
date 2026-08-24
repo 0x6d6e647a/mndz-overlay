@@ -1,0 +1,15 @@
+BDEPEND=dev-lisp/sbcl dev-libs/openssl:= dev-vcs/git
+DEFINED_PHASES=compile install test
+DESCRIPTION=Project-local Common Lisp library installer
+EAPI=8
+HOMEPAGE=https://github.com/fukamachi/qlot
+INHERIT=toolchain-funcs
+IUSE=test
+KEYWORDS=~amd64 ~ppc ~ppc64 ~riscv ~sparc ~x86 ~x64-macos
+LICENSE=MIT BSD BSD-2 MIT MPL-2.0 public-domain ZLIB
+RDEPEND=dev-lisp/sbcl dev-libs/openssl:= dev-vcs/git
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://github.com/fukamachi/qlot/releases/download/1.8.4/qlot-1.8.4.tar.gz
+_eclasses_=toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=e95ef83ab95fa9bbbebd734d4acd9b94
