@@ -17,6 +17,39 @@ SRC_URI="
 "
 
 LICENSE="ISC"
+# Inventoried projects (token). Autolith ISC; fff MIT; fff-c unique crate SPDX
+# (not one line per crate); .qlot software + colorlisp vendor as follows.
+# ISC: autolith, cl-colorist, cl-exec-sandbox, clifff, clinedi, colorlisp,
+#	mcparen, sbcl-workers, sexp-store
+# COLL-Attribution: cl-jobpond, colordiff, idsmall, parenchek,
+#	sbcl-generations, sexp-config
+# MIT: bordeaux-threads, cffi, closer-mop, dexador, serapeum, 3bz, babel,
+#	cl+ssl, cl-tga, deflate, fast-http, fast-io, global-vars, idna, iterate,
+#	parse-declarations, pngload, split-sequence, static-vectors, swap-bytes,
+#	trivial-features, trivial-file-size, trivial-gray-streams, uiop,
+#	usocket, fff, .qlot/asdf.lisp, Quicklisp client, colorlisp grammars +
+#	tree-sitter core (except clojure CC0), bordeaux-threads docs theme
+# BSD: cl-base64, ironclad, opticl, chipz, chunga, cl-jpeg, cl-ppcre,
+#	ieee-floats, local-time, monkeylib-binary-data, nibbles, opticl-core,
+#	parse-number, retrospectiff, salza2, skippy, smart-buffer, string-case,
+#	yason, zpb-exif, zpng, iterate/ext/fiveam
+# BSD-2: cl-cookie, flexi-streams, proc-parse, quri, xsubseq
+# public-domain: alexandria, cl-utilities, parse-float, trivial-garbage,
+#	iterate/ext/alexandria
+# ZLIB: documentation-utils, mmap, pathname-utils, trivial-indent,
+#	trivial-mimes
+# LLGPL-2.1: lisp-namespace, trivia, trivial-cltl2, type-i
+# Unlicense: trivial-macroexpand-all
+# WTFPL-2: introspect-environment
+# icu: colorlisp vendor/tree-sitter/src/unicode
+# CC0-1.0: colorlisp clojure grammar
+# fff-c crates: unique SPDX (Apache-2.0, Apache-2.0-with-LLVM-exceptions,
+#	Boost-1.0, MIT-0, MPL-2.0, Unicode-3.0, plus tokens already listed).
+LICENSE+="
+	Apache-2.0 Apache-2.0-with-LLVM-exceptions BSD BSD-2 Boost-1.0
+	CC0-1.0 COLL-Attribution ISC LLGPL-2.1 MIT MIT-0 MPL-2.0
+	Unicode-3.0 Unlicense WTFPL-2 ZLIB icu public-domain
+"
 SLOT="0"
 KEYWORDS="~amd64 ~ppc ~ppc64 ~riscv ~sparc ~x64-macos ~x86"
 IUSE="test"
