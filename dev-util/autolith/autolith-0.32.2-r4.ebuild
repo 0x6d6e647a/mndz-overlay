@@ -171,6 +171,270 @@ EOF
 	if [[ -f script/install ]]; then
 		chmod a-x script/install || die
 	fi
+
+	# Relocatable dumped cores: stash dump-root at save time; at image entry
+	# translate ASDF/Quicklisp paths from dump-root onto the launcher source-root
+	# (share dest). Do not hardcode /usr/share/autolith in dumped Lisp.
+	cat > script/gentoo-fhs.lisp <<'GENTOO_FHS_LISP' || die
+(defpackage #:autolith-gentoo-fhs
+  (:use #:cl)
+  (:export #:install-compile-namestring-hook
+           #:call-with-translated-source-namestring
+           #:stash-dump-source-root
+           #:relocate-to-live-source-root
+           #:*dump-source-root*))
+
+(in-package #:autolith-gentoo-fhs)
+
+(defvar *dump-source-root* nil
+  "Truename of the Autolith source root captured when the image was saved.")
+
+(defun env-directory (name)
+  (let ((value (uiop:getenv name)))
+    (and (stringp value)
+         (plusp (length value))
+         (uiop:ensure-directory-pathname value))))
+
+(defun dump-source-root-from-env ()
+  (env-directory "AUTOLITH_DUMP_SOURCE_ROOT"))
+
+(defun live-share-root ()
+  (env-directory "AUTOLITH_LIVE_SOURCE_ROOT"))
+
+(defun canonicalize-root (root)
+  (uiop:ensure-directory-pathname
+   (handler-case (truename root)
+     (error () root))))
+
+(defun root-namestring (root)
+  (namestring (uiop:ensure-directory-pathname root)))
+
+(defun pathname-namestring* (pathname)
+  (namestring pathname))
+
+(defun pathname-under-p (pathname root)
+  (let ((path (ignore-errors (pathname-namestring* pathname)))
+        (root-ns (ignore-errors (root-namestring root))))
+    (and path root-ns
+         (>= (length path) (length root-ns))
+         (string= path root-ns :end1 (length root-ns)))))
+
+(defun translate-path (pathname from-root to-root)
+  (let* ((path (pathname-namestring* pathname))
+         (from-ns (root-namestring from-root))
+         (rel (subseq path (length from-ns))))
+    (merge-pathnames rel (uiop:ensure-directory-pathname to-root))))
+
+(defun sbcl-contrib-pathname-p (pathname)
+  (let ((ns (namestring pathname)))
+    (or (search "/sbcl/contrib/" ns)
+        (search "/lib/sbcl/" ns)
+        (search "/lib64/sbcl/" ns))))
+
+(defun same-root-p (left right)
+  (equal (namestring (canonicalize-root left))
+         (namestring (canonicalize-root right))))
+
+(defun set-symbol-value (package-name symbol-name value)
+  (let* ((package (find-package package-name))
+         (symbol (and package (find-symbol symbol-name package))))
+    (when symbol
+      (setf (symbol-value symbol) value)
+      t)))
+
+(defun local-projects-directory ()
+  (uiop:ensure-directory-pathname
+   (merge-pathnames "autolith/qlot-local-projects/"
+                    (uiop:xdg-cache-home))))
+
+(defun call-with-translated-source-namestring (pathname thunk)
+  (let ((dump (dump-source-root-from-env))
+        (live (live-share-root)))
+    (if (and dump live (pathname-under-p pathname dump))
+        (let ((sb-c::*source-namestring*
+               (namestring (translate-path pathname dump live))))
+          (funcall thunk))
+        (funcall thunk))))
+
+(defun install-compile-namestring-hook ()
+  (let ((gf-name
+          (or (find-symbol "CALL-WITH-AROUND-COMPILE-HOOK" "ASDF")
+              (find-symbol "CALL-WITH-AROUND-COMPILE-HOOK"
+                           "ASDF/LISP-ACTION")))
+        (class-name (find-symbol "CL-SOURCE-FILE" "ASDF")))
+    (unless (and gf-name class-name)
+      (error "ASDF compile hook symbols are missing."))
+    (eval
+     `(defmethod ,gf-name :around ((component ,class-name) function)
+        (let ((dump (dump-source-root-from-env))
+              (live (live-share-root))
+              (source (asdf:component-pathname component)))
+          (if (and dump live source (pathname-under-p source dump))
+              (let ((sb-c::*source-namestring*
+                     (namestring (translate-path source dump live))))
+                (call-next-method))
+              (call-next-method))))))
+  t)
+
+(defun stash-dump-source-root (&optional source-root)
+  (setf *dump-source-root*
+        (canonicalize-root
+         (or source-root
+             (dump-source-root-from-env)
+             (ignore-errors (asdf:system-source-directory :autolith))
+             (uiop:getcwd))))
+  *dump-source-root*)
+
+(defun set-system-source-file (system pathname)
+  (let ((setter
+          (ignore-errors
+            (fdefinition
+             (list 'setf (find-symbol "SYSTEM-SOURCE-FILE" "ASDF"))))))
+    (when (and system setter pathname (probe-file pathname))
+      (funcall setter pathname system)
+      t)))
+
+(defun relocate-to-live-source-root (live-source-root)
+  (let ((dump-root *dump-source-root*))
+    (unless dump-root
+      (return-from relocate-to-live-source-root nil))
+    (let ((live (uiop:ensure-directory-pathname live-source-root)))
+      (when (string= (root-namestring dump-root) (root-namestring live))
+        (return-from relocate-to-live-source-root nil))
+      (when (find-package "ASDF")
+        (dolist (name (uiop:symbol-call '#:asdf '#:already-loaded-systems))
+          (let* ((system (uiop:symbol-call '#:asdf '#:registered-system name))
+                 (asd (and system
+                           (ignore-errors
+                             (uiop:symbol-call '#:asdf '#:system-source-file
+                                               system)))))
+            (when (and asd
+                       (pathname-under-p asd dump-root)
+                       (not (sbcl-contrib-pathname-p asd)))
+              (set-system-source-file
+               system (translate-path asd dump-root live)))))
+        (let ((autolith-asd
+                (make-pathname :name "autolith" :type "asd" :defaults live))
+              (sys (uiop:symbol-call '#:asdf '#:registered-system "autolith")))
+          (set-system-source-file sys autolith-asd))
+        (uiop:symbol-call '#:asdf '#:clear-output-translations)
+        (uiop:symbol-call '#:asdf '#:initialize-output-translations))
+      (let ((ql-home (merge-pathnames ".qlot/" live)))
+        (when (probe-file ql-home)
+          (let ((home (uiop:ensure-directory-pathname ql-home)))
+            (set-symbol-value "QL" "*QUICKLISP-HOME*" home)
+            (set-symbol-value "QL-SETUP" "*QUICKLISP-HOME*" home))))
+      (let ((index-dir (local-projects-directory)))
+        (ensure-directories-exist index-dir)
+        (set-symbol-value "QL" "*LOCAL-PROJECT-DIRECTORIES*" (list index-dir))
+        (set-symbol-value "QUICKLISP-CLIENT" "*LOCAL-PROJECT-DIRECTORIES*"
+                          (list index-dir)))
+      t)))
+GENTOO_FHS_LISP
+
+	python3 - <<'GENTOO_PATCH_PY' || die "failed to patch Autolith image entry for relocatable runtime"
+from pathlib import Path
+
+
+def replace_once(path, old, new):
+    text = Path(path).read_text()
+    count = text.count(old)
+    if count != 1:
+        raise SystemExit(f"{path}: expected exactly 1 match, got {count}")
+    Path(path).write_text(text.replace(old, new, 1))
+
+
+replace_once(
+    "src/startup/active-image.lisp",
+    """             (sb-posix:setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root) 1)
+             (restart-case
+                 (main (rest arguments))""",
+    """             (sb-posix:setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root) 1)
+             (uiop:symbol-call '#:autolith-gentoo-fhs
+                               '#:relocate-to-live-source-root
+                               source-root)
+             (restart-case
+                 (main (rest arguments))""",
+)
+
+replace_once(
+    "src/startup/active-image.lisp",
+    """        (sb-ext:save-lisp-and-die
+         (namestring pathname)
+         :toplevel #'active-image-main""",
+    """        (uiop:symbol-call '#:autolith-gentoo-fhs '#:stash-dump-source-root)
+        (sb-ext:save-lisp-and-die
+         (namestring pathname)
+         :toplevel #'active-image-main""",
+)
+
+replace_once(
+    "recovery/runtime.lisp",
+    """  (let ((source-root
+          (uiop:ensure-directory-pathname
+           (or (first arguments)
+               (error "The recovery image needs the source root.")))))
+    (if (equal (rest arguments) '("--probe"))""",
+    """  (let ((source-root
+          (uiop:ensure-directory-pathname
+           (or (first arguments)
+               (error "The recovery image needs the source root.")))))
+    (unless (equal (rest arguments) '("--probe"))
+      (uiop:symbol-call '#:autolith-gentoo-fhs
+                        '#:relocate-to-live-source-root
+                        source-root))
+    (if (equal (rest arguments) '("--probe"))""",
+)
+
+replace_once(
+    "recovery/runtime.lisp",
+    """  (ensure-directories-exist pathname)
+  (sb-ext:save-lisp-and-die (namestring pathname)
+                            :toplevel #'recovery-main""",
+    """  (ensure-directories-exist pathname)
+  (uiop:symbol-call '#:autolith-gentoo-fhs '#:stash-dump-source-root)
+  (sb-ext:save-lisp-and-die (namestring pathname)
+                            :toplevel #'recovery-main""",
+)
+
+replace_once(
+    "script/build-active.lisp",
+    """  (load project-setup)
+  (load (merge-pathnames "script/build-sandbox.lisp" source-root))""",
+    """  (load project-setup)
+  (load (merge-pathnames "script/gentoo-fhs.lisp" source-root))
+  (uiop:symbol-call '#:autolith-gentoo-fhs '#:install-compile-namestring-hook)
+  (load (merge-pathnames "script/build-sandbox.lisp" source-root))""",
+)
+
+replace_once(
+    "script/build-recovery.lisp",
+    """             (load quicklisp-setup)
+             (uiop:symbol-call '#:ql '#:quickload :serapeum :silent t)
+             (uiop:symbol-call '#:ql '#:quickload :sbcl-generations :silent t)
+             (let ((package (or (find-package "AUTOLITH")
+                                (make-package "AUTOLITH" :use '("CL")))))
+               (export (mapcar (lambda (name) (intern name package))
+                               '("RECOVERY-MAIN" "RECOVERY-IMAGE-SAVE"))
+                       package))
+             (load (merge-pathnames "recovery/runtime.lisp" source-root)))""",
+    """             (load quicklisp-setup)
+             (load (merge-pathnames "script/gentoo-fhs.lisp" source-root))
+             (uiop:symbol-call '#:autolith-gentoo-fhs '#:install-compile-namestring-hook)
+             (uiop:symbol-call '#:ql '#:quickload :serapeum :silent t)
+             (uiop:symbol-call '#:ql '#:quickload :sbcl-generations :silent t)
+             (let ((package (or (find-package "AUTOLITH")
+                                (make-package "AUTOLITH" :use '("CL")))))
+               (export (mapcar (lambda (name) (intern name package))
+                               '("RECOVERY-MAIN" "RECOVERY-IMAGE-SAVE"))
+                       package))
+             (let ((runtime (merge-pathnames "recovery/runtime.lisp" source-root)))
+               (uiop:symbol-call '#:autolith-gentoo-fhs
+                                 '#:call-with-translated-source-namestring
+                                 runtime
+                                 (lambda () (load runtime)))))""",
+)
+GENTOO_PATCH_PY
 }
 
 # shellcheck disable=SC2329
@@ -187,6 +451,22 @@ src_compile() {
 	# Materialize offline .qlot into the source tree.
 	rm -rf .qlot || die
 	cp -a "${qlot_src}" .qlot || die
+
+	# --from-source loads .qlot/local-init/; dumped cores do not.
+	# Point Quicklisp's local-projects index at XDG cache (share stays read-only).
+	mkdir -p .qlot/local-init || die
+	cat > .qlot/local-init/qlot-00-fhs.lisp <<'QLOT_00_FHS' || die
+(defpackage #:qlot/local-init/fhs
+  (:use #:cl))
+(in-package #:qlot/local-init/fhs)
+
+(let ((directory
+        (uiop:ensure-directory-pathname
+         (merge-pathnames "autolith/qlot-local-projects/"
+                          (uiop:xdg-cache-home)))))
+  (ensure-directories-exist directory)
+  (setf ql:*local-project-directories* (list directory)))
+QLOT_00_FHS
 
 	# --- fff (cargo offline) ---
 	einfo "Building fff (offline cargo)…"
@@ -308,6 +588,9 @@ src_compile() {
 	export XDG_CACHE_HOME="${T}/xdg-cache"
 	export XDG_STATE_HOME="${T}/xdg-state"
 	mkdir -p "${HOME}" "${XDG_DATA_HOME}" "${XDG_CACHE_HOME}" "${XDG_STATE_HOME}" || die
+	# Compile-time debug namestrings: map ${S} → live share dest (ebuild-known).
+	export AUTOLITH_DUMP_SOURCE_ROOT="${S}"
+	export AUTOLITH_LIVE_SOURCE_ROOT="${EPREFIX}/usr/share/autolith"
 
 	# C lean A: emerge-time recovery + active cores under T, installed privately.
 	# Manifests are written beside each core as manifest.sexp — use separate dirs.
