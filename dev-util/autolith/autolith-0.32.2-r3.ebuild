@@ -240,6 +240,30 @@ src_compile() {
 	cp -a "${sandbox_root}/build/cl-exec-sandbox-helper" \
 		"${T}/natives/cl-exec-sandbox-helper" || die
 
+	# --- Prune uninstalled tracked files before fabricating git ---
+	# HEAD must match the installed share tracked set.
+	rm -rf .github nix server tests || die
+	rm -f flake.nix flake.lock || die
+	rm -f bin/autolith-release || die
+	rm -f script/install script/bootstrap script/bootstrap.lisp \
+		script/qlot-install.lisp script/build-fff script/build-fff.lisp || die
+	rm -f sbcl-source.sha256 AGENTS.md AUTOLITH.org || die
+	rm -rf native/fff || die
+	rmdir native 2>/dev/null || true
+	# Keep remaining script/ (runtime-requirement, build-sandbox, check*,
+	# image builders). Those files are loaded or hashed into cores.
+	# Omit human-only docs; keep prompt templates when present. Do not rm -rf docs.
+	if [[ -d docs ]]; then
+		local doc
+		for doc in docs/* docs/.[!.]*; do
+			[[ -e ${doc} ]] || continue
+			case ${doc#docs/} in
+			system-prompt.org | request-context.org) ;;
+			*) rm -rf "${doc}" || die ;;
+			esac
+		done
+	fi
+
 	# --- Fabricate git identity for recovery/active provenance ---
 	einfo "Fabricating git provenance for image builds…"
 	if [[ ! -d .git ]]; then
@@ -252,6 +276,14 @@ src_compile() {
 			GIT_COMMITTER_DATE='2000-01-01T00:00:00Z' \
 			git commit --quiet --message "Autolith ${PV} Portage source" || die
 	fi
+	git gc --quiet --prune=now || die
+	rm -f .git/hooks/*.sample || die
+	rm -f .git/index || die
+	git read-tree HEAD || die
+	# gc pack-refs can leave .git/refs empty; Portage drops empty dirs and
+	# Git then refuses the tree as a repository. Keep a loose master ref.
+	mkdir -p .git/refs/heads || die
+	git update-ref refs/heads/master HEAD || die
 
 	# --- Synthetic SBCL source root (USE=source layout) ---
 	local gentoo_src="/usr/$(get_libdir)/sbcl/src"
@@ -316,8 +348,60 @@ src_install() {
 	host_pv=$(tr -d '[:space:]' < sbcl.version) || die
 
 	dodir "${autolith_share}"
-	# Arch-independent tree (Lisp, .qlot, fabricated git, scripts, launcher).
-	cp -a "${S}/." "${sharedir}/" || die
+
+	# ColorLisp vendor C is compile-only; strip it and other agreed .qlot
+	# leaves from ${S} before the keep-list copy (deps tarball still has C).
+	[[ -d .qlot ]] || die "missing .qlot at ${S}/.qlot"
+	rm -rf .qlot/tmp || die
+	local qlot_path
+	while IFS= read -r qlot_path; do
+		[[ -n ${qlot_path} ]] || continue
+		rm -rf "${qlot_path}" || die
+	done < <(
+		find .qlot \( \
+			-type d \( \
+				-path '*/colorlisp*/vendor/grammars' \
+				-o -path '*/colorlisp*/vendor/tree-sitter' \
+				-o -path '*/colorlisp*/vendor/common' \
+				-o -path '*/cl-exec-sandbox*/build' \
+				-o -path '*/bordeaux-threads*/docs' \
+				-o -path '*/ironclad*/testing' \
+				-o -name '.github' \
+			\) \
+			-o -type f -path '*/colorlisp*/native/colorlisp-tree-sitter.c' \
+			\) -print
+		if [[ -d .qlot/dists/cffi ]]; then
+			find .qlot/dists/cffi -type d \( -name doc -o -name tests -o -name examples \) -print
+		fi
+	)
+
+	# Explicit keep list (not cp -a of ${S}).
+	cp -a src autolith.asd qlfile qlfile.lock sbcl.version \
+		"${sharedir}/" || die
+	[[ -f .gitignore ]] && { cp -a .gitignore "${sharedir}/" || die; }
+	[[ -f LICENSE ]] && { cp -a LICENSE "${sharedir}/" || die; }
+	[[ -f README.org ]] && { cp -a README.org "${sharedir}/" || die; }
+	[[ -f sbcl-source-releases.sha256 ]] && {
+		cp -a sbcl-source-releases.sha256 "${sharedir}/" || die
+	}
+	cp -a .qlot "${sharedir}/" || die
+	cp -a .git "${sharedir}/" || die
+	keepdir "${autolith_share}/.git/refs"
+	keepdir "${autolith_share}/.git/refs/heads"
+	cp -a recovery "${sharedir}/" || die
+	mkdir -p "${sharedir}/bin" || die
+	cp -a bin/autolith bin/autolith-active bin/autolith-runtime \
+		bin/autolith-search-worker "${sharedir}/bin/" || die
+	cp -a script "${sharedir}/" || die
+	if [[ -f docs/system-prompt.org || -f docs/request-context.org ]]; then
+		mkdir -p "${sharedir}/docs" || die
+		[[ -f docs/system-prompt.org ]] && {
+			cp -a docs/system-prompt.org "${sharedir}/docs/" || die
+		}
+		[[ -f docs/request-context.org ]] && {
+			cp -a docs/request-context.org "${sharedir}/docs/" || die
+		}
+	fi
 
 	# Architecture-specific natives
 	insinto "${autolith_libdir}/lib"
