@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="wfa2">
+			Use the bundled WFA2-lib sequence alignment backend through the
+			biodiff-wfa2-sys crate (upstream default features). Disable for the
+			pure-Rust RustBio backend.
+		</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/8051Enthusiast/biodiff/issues</bugs-to>
+		<remote-id type="github">8051Enthusiast/biodiff</remote-id>
+		<remote-id type="crates">biodiff</remote-id>
+	</upstream>
+</pkgmetadata>
