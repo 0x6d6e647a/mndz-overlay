@@ -1,0 +1,14 @@
+BDEPEND=wfa2? ( dev-build/cmake llvm-core/clang:21 ) || ( >=dev-lang/rust-bin-1.74.1:* >=dev-lang/rust-1.74.1:* )
+DEFINED_PHASES=compile configure install setup test unpack
+DESCRIPTION=Visual binary file diff using sequence alignment
+EAPI=8
+HOMEPAGE=https://github.com/8051Enthusiast/biodiff
+INHERIT=cargo
+IUSE=+wfa2 test debug
+KEYWORDS=~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86
+LICENSE=MIT Apache-2.0 BSD MIT MPL-2.0 Unicode-DFS-2016
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://crates.io/api/v1/crates/biodiff/1.2.1/download -> biodiff-1.2.1.crate https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/biodiff-1.2.1/biodiff-1.2.1-crates.tar.xz
+_eclasses_=cargo	c18ade5e10cfd39155908ca389968d65	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	0e6dcc60973be397aa943d9efae0e2bf	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=29e0f581d74fb060a1b4a38b7e4d7f19
