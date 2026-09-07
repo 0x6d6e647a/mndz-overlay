@@ -1,0 +1,15 @@
+BDEPEND=dev-build/gn dev-build/ninja dev-lang/python dev-libs/protobuf llvm-core/clang:22 virtual/pkgconfig || ( >=dev-lang/rust-bin-1.95.0:* >=dev-lang/rust-1.95.0:* )
+DEFINED_PHASES=compile configure install prepare pretend setup test unpack
+DESCRIPTION=OpenAI Codex CLI (from-source rusty_v8)
+EAPI=8
+HOMEPAGE=https://github.com/openai/codex
+INHERIT=cargo check-reqs shell-completion toolchain-funcs
+IUSE=bash-completion fish-completion test zsh-completion debug
+KEYWORDS=-* ~amd64
+LICENSE=Apache-2.0 Apache-2.0 Apache-2.0-with-LLVM-exceptions BSD-2 BSD Boost-1.0 CC0-1.0 CDLA-Permissive-2.0 ISC MIT MPL-2.0 Unicode-3.0 ZLIB
+RDEPEND=dev-libs/openssl:= sys-apps/bubblewrap
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://github.com/openai/codex/archive/refs/tags/rust-v0.153.3.tar.gz -> codex-0.153.3.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/codex-0.153.3/codex-0.153.3-crates.tar.xz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/rusty-v8-150.4.0/rusty-v8-150.4.0-with-submodules.tar.xz https://commondatastorage.googleapis.com/chromium-browser-clang/Linux_x64/clang-llvmorg-23-init-10931-g20b6ec66-11.tar.xz https://commondatastorage.googleapis.com/chromium-browser-clang/Linux_x64/rust-toolchain-4c4205163abcbd08948b3efab796c543ba1ea687-4-llvmorg-23-init-10931-g20b6ec66.tar.xz https://github.com/helix-editor/nucleo/archive/4253de9faabb4e5c6d81d946a5e35a90f87347ee.tar.gz -> nucleo-4253de9faabb4e5c6d81d946a5e35a90f87347ee.gh.tar.gz https://github.com/helix-editor/nucleo/archive/4253de9faabb4e5c6d81d946a5e35a90f87347ee.tar.gz -> nucleo-4253de9faabb4e5c6d81d946a5e35a90f87347ee.gh.tar.gz https://github.com/dzbarsky/rules_rust/archive/b56cbaa8465e74127f1ea216f813cd377295ad81.tar.gz -> rules_rust-b56cbaa8465e74127f1ea216f813cd377295ad81.gh.tar.gz https://github.com/openai-oss-forks/crossterm/archive/45fecb9508105988f42fe6ff0441783ed3717f92.tar.gz -> crossterm-45fecb9508105988f42fe6ff0441783ed3717f92.gh.tar.gz https://github.com/openai-oss-forks/tungstenite-rs/archive/4fffad30fe373adbdcffab9545e9e9bf4f2fc19f.tar.gz -> tungstenite-rs-4fffad30fe373adbdcffab9545e9e9bf4f2fc19f.gh.tar.gz https://github.com/openai-oss-forks/tokio-tungstenite/archive/0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186.tar.gz -> tokio-tungstenite-0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186.gh.tar.gz
+_eclasses_=cargo	c18ade5e10cfd39155908ca389968d65	check-reqs	12ab9d3fc16bfe1f87c6fb652324b57c	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	0e6dcc60973be397aa943d9efae0e2bf	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	shell-completion	63a62de3ca49c798ee6e89f190e45d0e	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=ec7d35f7b570e68bf17000b2fdbb2fb1

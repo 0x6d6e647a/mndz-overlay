@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription lang="en">
+		Codex CLI is an AI-powered coding agent from OpenAI that runs in your
+		terminal. This overlay package always builds rusty_v8 from source
+		(V8_FROM_SOURCE=1) on amd64; it does not install a prebuilt librusty_v8.
+	</longdescription>
+	<upstream>
+		<bugs-to>https://github.com/openai/codex/issues</bugs-to>
+		<remote-id type="github">openai/codex</remote-id>
+	</upstream>
+</pkgmetadata>
