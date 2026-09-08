@@ -20,7 +20,7 @@ KEYWORDS="~amd64 ~arm64"
 IUSE="test"
 RESTRICT="!test? ( test )"
 
-BDEPEND=">=dev-lang/bun-bin-1.3.6"
+BDEPEND=">=dev-lang/bun-bin-1.3.6:0"
 RDEPEND="${BDEPEND}"
 
 src_unpack() {

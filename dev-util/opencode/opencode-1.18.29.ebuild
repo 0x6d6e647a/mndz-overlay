@@ -22,7 +22,7 @@ IUSE="bash-completion test +webui zsh-completion"
 # strip the binary reports host Bun (e.g. 1.3.14) instead of OPENCODE_VERSION.
 RESTRICT="strip !test? ( test )"
 
-BDEPEND=">=dev-lang/bun-bin-1.3.14"
+BDEPEND="=dev-lang/bun-bin-1.3.14"
 RDEPEND="sys-apps/ripgrep"
 
 # InstallTree deps: unpack source + overlay node_modules onto ${S}.
@@ -42,9 +42,9 @@ src_compile() {
 	# Deps already installed under ${S} via InstallTree deps tarball.
 	cd packages/opencode || die
 	if use webui; then
-		bun --bun ./script/build.ts --single --skip-install || die
+		bun-1.3.14 --bun ./script/build.ts --single --skip-install || die
 	else
-		bun --bun ./script/build.ts --single --skip-install --skip-embed-web-ui || die
+		bun-1.3.14 --bun ./script/build.ts --single --skip-install --skip-embed-web-ui || die
 	fi
 }
 

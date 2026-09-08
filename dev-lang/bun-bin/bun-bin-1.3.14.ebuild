@@ -11,7 +11,7 @@ DESCRIPTION="Incredibly fast JavaScript runtime, bundler, test runner, and packa
 HOMEPAGE="https://bun.sh"
 
 LICENSE="MIT"
-SLOT="0"
+SLOT="1.3.14"
 KEYWORDS="-* ~amd64 ~arm64"
 IUSE="bash-completion cpu_flags_x86_avx2 debug fish-completion zsh-completion"
 
