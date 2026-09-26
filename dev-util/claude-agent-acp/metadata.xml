@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+    <!-- maintainer-needed -->
+    <upstream>
+        <bugs-to>https://github.com/agentclientprotocol/claude-agent-acp</bugs-to>
+        <remote-id type="github">agentclientprotocol/claude-agent-acp</remote-id>
+    </upstream>
+</pkgmetadata>
