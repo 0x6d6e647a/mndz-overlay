@@ -27,7 +27,9 @@ RESTRICT="!test? ( test )"
 RDEPEND=">=net-libs/nodejs-22[npm]"
 BDEPEND="${RDEPEND}"
 
-# Nested glibc x86-64 Claude CLI from the optional SDK package. Do not strip it.
+# Nested glibc x86-64 Claude CLI from the optional SDK package.
+# QA_PREBUILT only skips the pre-stripped QA notice. dostrip -x is what
+# stops prepstrip from removing .symtab.
 QA_PREBUILT="usr/lib*/node_modules/@agentclientprotocol/claude-agent-acp/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude"
 
 src_install() {
@@ -40,6 +42,12 @@ src_install() {
 		--prefix "${ED}/usr" \
 		--cache "${T}/npm-cache" \
 		install "${DISTDIR}/${P}.tgz" || die "npm install failed"
+
+	local claude
+	for claude in "${ED}"/usr/lib*/node_modules/@agentclientprotocol/claude-agent-acp/node_modules/@anthropic-ai/claude-agent-sdk-linux-x64/claude; do
+		[[ -f ${claude} ]] || die "prebuilt Claude CLI missing"
+		dostrip -x "${claude#"${ED}"}"
+	done
 }
 
 src_test() {
