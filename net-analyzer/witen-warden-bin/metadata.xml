@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription lang="en">
+		Witen Warden is the prebuilt log-tailing jailer from Witen Labs. This
+		package installs the upstream amd64 binary at /usr/bin/warden, with the
+		systemd unit, OpenRC init script, and the upstream default configuration.
+	</longdescription>
+	<upstream>
+		<remote-id type="website">https://www.witenlabs.com</remote-id>
+	</upstream>
+</pkgmetadata>
