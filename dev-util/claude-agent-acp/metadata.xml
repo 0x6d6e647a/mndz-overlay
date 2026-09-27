@@ -2,6 +2,9 @@
 <!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
 <pkgmetadata>
     <!-- maintainer-needed -->
+    <use>
+        <flag name="bundled-claude">Install the Claude CLI bundled in the npm package</flag>
+    </use>
     <upstream>
         <bugs-to>https://github.com/agentclientprotocol/claude-agent-acp</bugs-to>
         <remote-id type="github">agentclientprotocol/claude-agent-acp</remote-id>
