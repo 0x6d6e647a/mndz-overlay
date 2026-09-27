@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription lang="en">
+		Grok Bot is the prebuilt desktop agent from xAI. This package installs
+		the upstream Linux build under /opt/Grok Bot, with a /usr/bin/grok-bot
+		symlink and the upstream desktop file for the grokbot and sand schemes.
+	</longdescription>
+	<upstream>
+		<remote-id type="website">https://x.ai/bot</remote-id>
+	</upstream>
+</pkgmetadata>
