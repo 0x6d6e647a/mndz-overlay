@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit unpacker systemd
+inherit unpacker systemd bash-completion-r1
 
 DESCRIPTION="Witen Warden log-tailing jailer (prebuilt binary)"
 HOMEPAGE="https://www.witenlabs.com"
@@ -17,7 +17,7 @@ S="${WORKDIR}"
 LICENSE="all-rights-reserved"
 SLOT="0"
 KEYWORDS="-* ~amd64"
-IUSE="iptables"
+IUSE="bash-completion iptables"
 RESTRICT="bindist mirror strip"
 
 QA_PREBUILT="usr/bin/warden"
@@ -27,6 +27,7 @@ RDEPEND="
 	net-firewall/nftables
 	sys-apps/acl
 	virtual/logger
+	bash-completion? ( app-shells/bash-completion )
 	iptables? ( net-firewall/iptables )
 "
 
@@ -91,8 +92,9 @@ src_install() {
 	fowners root:witen-warden /etc/witen/warden.toml
 	insopts -m0644
 
-	insinto /usr/share/bash-completion/completions
-	doins usr/share/bash-completion/completions/warden
+	if use bash-completion; then
+		newbashcomp usr/share/bash-completion/completions/warden warden
+	fi
 
 	doman \
 		usr/share/man/man8/warden.8 \
