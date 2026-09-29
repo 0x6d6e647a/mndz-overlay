@@ -13,7 +13,8 @@ CADDY_ANALYZE_BIN=/absolute/path/caddy-analyze python3 -m unittest discover -s t
 
 The tests check ebuild build and test phases, linker version injection, metadata,
 completion failure handling, all completion USE flag combinations, CLI command
-availability, JSON report fields, input ordering invariance, and invalid flags.
+availability, JSON report fields, input ordering invariance, invalid flags, and
+preservation of the local patch reference across future manager version bumps.
 They isolate configuration in temporary directories and disable GeoIP downloads.
 The ebuild's `test` USE flag runs the upstream Go suite, including the patched
 GeoIP regression test. Upstream HTTP contract tests use local loopback servers.

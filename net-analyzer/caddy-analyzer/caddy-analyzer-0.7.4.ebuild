@@ -9,7 +9,7 @@ DESCRIPTION="Caddy access log analyzer, security inspector, and TUI dashboard"
 HOMEPAGE="https://github.com/lenny-ts/caddy-analyzer"
 SRC_URI="
 	https://github.com/lenny-ts/caddy-analyzer/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz
-	https://github.com/airencracken/mndz-overlay-assets/releases/download/${P}/${P}-vendor.tar.xz
+	https://github.com/airencracken/mndz-overlay-assets/releases/download/caddy-analyzer-${PV}/caddy-analyzer-${PV}-vendor.tar.xz
 "
 
 LICENSE="Apache-2.0 BSD ISC MIT"
@@ -20,7 +20,7 @@ RESTRICT="!test? ( test )"
 
 BDEPEND=">=dev-lang/go-1.25.13:="
 
-PATCHES=( "${FILESDIR}/${P}-offline-geoip.patch" )
+PATCHES=( "${FILESDIR}/caddy-analyzer-0.7.4-offline-geoip.patch" )
 
 src_compile() {
 	export CGO_ENABLED=0

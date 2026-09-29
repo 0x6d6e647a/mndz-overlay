@@ -18,7 +18,7 @@ EBUILD = PACKAGE / "caddy-analyzer-0.7.4.ebuild"
 BINARY = os.environ.get("CADDY_ANALYZE_BIN")
 
 
-def phase(command, flags=(), binary=None, text=None):
+def phase(command, flags=(), binary=None, text=None, version="0.7.4"):
     """Run an ebuild phase with recording substitutes for Portage helpers."""
     with tempfile.TemporaryDirectory(prefix="caddy package '") as directory:
         root = Path(directory)
@@ -39,7 +39,7 @@ newzshcomp() { printf 'zsh %s\n' "$2"; }
 source "$1" || exit 1
 eval "$2"
 '''
-        env = dict(os.environ, T=directory, PV="0.7.4", P="caddy-analyzer-0.7.4",
+        env = dict(os.environ, T=directory, PV=version, P=f"caddy-analyzer-{version}",
                    FILESDIR=str(PACKAGE / "files"), TEST_USE=" ".join(flags),
                    XDG_CONFIG_HOME=str(root / "config"))
         return subprocess.run(["bash", "-c", script, "test", str(ebuild), command],
@@ -82,6 +82,29 @@ class PackagingTests(unittest.TestCase):
         self.assertEqual(result.stdout.splitlines()[0], "Apache-2.0 BSD ISC MIT")
         self.assertIn(">=dev-lang/go-1.25.13:=", result.stdout)
         self.assertIn("offline-geoip.patch", result.stdout)
+
+    def assert_donor_paths(self, version, text=None):
+        result = phase('printf "%s\\n" "${PATCHES[@]}" "$SRC_URI"',
+                       version=version, text=text)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        patch = Path(result.stdout.splitlines()[0])
+        self.assertEqual(patch.name, "caddy-analyzer-0.7.4-offline-geoip.patch")
+        self.assertTrue(patch.is_file())
+        self.assertIn(f"releases/download/caddy-analyzer-{version}/"
+                      f"caddy-analyzer-{version}-vendor.tar.xz", result.stdout)
+        self.assertIn(f"refs/tags/v{version}.tar.gz", result.stdout)
+
+    def test_donor_paths_survive_version_bumps(self):
+        for version in ("0.7.4", "0.7.5", "0.8.0", "1.0.0"):
+            with self.subTest(version=version):
+                self.assert_donor_paths(version)
+
+    def test_version_derived_patch_mutation_is_detected(self):
+        mutant = EBUILD.read_text().replace(
+            "${FILESDIR}/caddy-analyzer-0.7.4-offline-geoip.patch",
+            "${FILESDIR}/${P}-offline-geoip.patch")
+        with self.assertRaises(AssertionError):
+            self.assert_donor_paths("0.7.5", text=mutant)
 
     def test_failed_completion_is_never_installed(self):
         with tempfile.TemporaryDirectory() as directory:
