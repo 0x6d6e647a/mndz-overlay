@@ -1,0 +1,47 @@
+Avoid a typed-nil GeoIP panic when interval reports run without a database.
+Keep the interval filtering test independent of external GeoIP downloads.
+
+--- a/cmd/root.go
++++ b/cmd/root.go
+@@ -556,6 +556,10 @@
+ 	if geo == nil || entry.RemoteIP == "" {
+ 		return
+ 	}
++	// A nil *GeoIP inside an interface is not equal to nil.
++	if g, ok := geo.(*enrich.GeoIP); ok && g == nil {
++		return
++	}
+ 	if info, err := geo.Lookup(entry.RemoteIP); err == nil {
+ 		entry.Geo = info
+ 	}
+--- a/cmd/follow_filter_test.go
++++ b/cmd/follow_filter_test.go
+@@ -11,6 +11,7 @@
+ 	"testing"
+ 	"time"
+ 
++	"github.com/lenny-ts/caddy-analyzer/pkg/enrich"
+ 	"github.com/lenny-ts/caddy-analyzer/pkg/types"
+ )
+ 
+@@ -156,7 +157,20 @@
+ 	}
+ }
+ 
++func TestLookupGeoTypedNil(t *testing.T) {
++	entry := &types.LogEntry{RemoteIP: "192.0.2.1"}
++	var geo *enrich.GeoIP
++	lookupGeo(entry, geo)
++	if entry.Geo != (types.GeoInfo{}) {
++		t.Fatal("unavailable GeoIP must leave enrichment empty")
++	}
++}
++
+ func TestRunIntervalModeDoesNotBucketRejectedRows(t *testing.T) {
++	// This filtering test must not download external GeoIP databases.
++	origNoAutoDL := flagNoAutoDL
++	flagNoAutoDL = true
++	defer func() { flagNoAutoDL = origNoAutoDL }()
+ 	dir := t.TempDir()
+ 	logPath := filepath.Join(dir, "access.log")
+ 	outPath := filepath.Join(dir, "out.txt")
