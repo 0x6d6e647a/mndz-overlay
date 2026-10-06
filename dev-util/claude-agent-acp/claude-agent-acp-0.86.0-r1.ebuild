@@ -21,12 +21,13 @@ src_unpack() {
 LICENSE="Apache-2.0"
 SLOT="0"
 KEYWORDS="-* ~amd64"
-IUSE="bundled-claude test"
+IUSE="bundled-claude external-claude test"
+REQUIRED_USE="?? ( bundled-claude external-claude )"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
 	>=net-libs/nodejs-22[npm]
-	!bundled-claude? ( dev-util/claude-code )
+	!bundled-claude? ( !external-claude? ( dev-util/claude-code ) )
 "
 BDEPEND="${RDEPEND}"
 
@@ -65,19 +66,22 @@ src_install() {
 			[[ -e ${bundled} ]] || continue
 			rm -rf "${bundled}" || die "could not remove bundled Claude CLI"
 		done
-		# Point the adapter at gentoo Claude Code unless the operator already set CLAUDE_CODE_EXECUTABLE.
-		rm -f "${ED}/usr/bin/claude-agent-acp" || die "could not remove npm bin"
-		local entries=( "${ED}"/usr/lib*/node_modules/@agentclientprotocol/claude-agent-acp/dist/index.js )
-		[[ ${#entries[@]} -eq 1 && -f ${entries[0]} ]] || die "adapter entrypoint missing"
-		local entry="${entries[0]#"${ED}"}"
-		cat > "${T}/claude-agent-acp" <<EOF || die "could not write claude-agent-acp wrapper"
+		# external-claude leaves the npm bin. The operator sets CLAUDE_CODE_EXECUTABLE.
+		if ! use external-claude; then
+			# Point the adapter at gentoo Claude Code unless the operator already set CLAUDE_CODE_EXECUTABLE.
+			rm -f "${ED}/usr/bin/claude-agent-acp" || die "could not remove npm bin"
+			local entries=( "${ED}"/usr/lib*/node_modules/@agentclientprotocol/claude-agent-acp/dist/index.js )
+			[[ ${#entries[@]} -eq 1 && -f ${entries[0]} ]] || die "adapter entrypoint missing"
+			local entry="${entries[0]#"${ED}"}"
+			cat > "${T}/claude-agent-acp" <<EOF || die "could not write claude-agent-acp wrapper"
 #!/bin/sh
 if [ -z "\${CLAUDE_CODE_EXECUTABLE+x}" ]; then
 	export CLAUDE_CODE_EXECUTABLE=/opt/bin/claude
 fi
 exec node "${entry}" "\$@"
 EOF
-		dobin "${T}/claude-agent-acp"
+			dobin "${T}/claude-agent-acp"
+		fi
 	fi
 }
 

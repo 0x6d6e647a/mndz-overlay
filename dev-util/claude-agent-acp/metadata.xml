@@ -4,6 +4,7 @@
     <!-- maintainer-needed -->
     <use>
         <flag name="bundled-claude">Install the Claude CLI bundled in the npm package</flag>
+        <flag name="external-claude">Use a Claude Code executable supplied outside Portage via CLAUDE_CODE_EXECUTABLE</flag>
     </use>
     <upstream>
         <bugs-to>https://github.com/agentclientprotocol/claude-agent-acp</bugs-to>
