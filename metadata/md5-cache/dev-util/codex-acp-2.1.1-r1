@@ -1,13 +1,14 @@
-BDEPEND=>=net-libs/nodejs-22[npm] !bundled-codex? ( dev-util/codex )
+BDEPEND=>=net-libs/nodejs-22[npm] !bundled-codex? ( !external-codex? ( dev-util/codex ) )
 DEFINED_PHASES=install test unpack
 DESCRIPTION=ACP adapter for the Codex CLI
 EAPI=8
 HOMEPAGE=https://github.com/agentclientprotocol/codex-acp
-IUSE=bundled-codex test
+IUSE=bundled-codex external-codex test
 KEYWORDS=-* ~amd64
 LICENSE=Apache-2.0
-RDEPEND=>=net-libs/nodejs-22[npm] !bundled-codex? ( dev-util/codex )
+RDEPEND=>=net-libs/nodejs-22[npm] !bundled-codex? ( !external-codex? ( dev-util/codex ) )
+REQUIRED_USE=?? ( bundled-codex external-codex )
 RESTRICT=!test? ( test )
 SLOT=0
 SRC_URI=https://registry.npmjs.org/@agentclientprotocol/codex-acp/-/codex-acp-2.1.1.tgz -> codex-acp-2.1.1.tgz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/codex-acp-2.1.1/codex-acp-2.1.1-deps.tar.xz
-_md5_=25033eee65b8f1da148f94822217e16e
+_md5_=3fa7e7462c4bd0fc161f3743464c30bd

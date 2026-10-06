@@ -4,6 +4,7 @@
     <!-- maintainer-needed -->
     <use>
         <flag name="bundled-codex">Install the Codex CLI bundled in the npm package</flag>
+        <flag name="external-codex">Use a Codex executable supplied outside Portage via CODEX_PATH</flag>
     </use>
     <upstream>
         <bugs-to>https://github.com/agentclientprotocol/codex-acp</bugs-to>

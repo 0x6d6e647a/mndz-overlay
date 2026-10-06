@@ -21,12 +21,13 @@ src_unpack() {
 LICENSE="Apache-2.0"
 SLOT="0"
 KEYWORDS="-* ~amd64"
-IUSE="bundled-codex test"
+IUSE="bundled-codex external-codex test"
+REQUIRED_USE="?? ( bundled-codex external-codex )"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
 	>=net-libs/nodejs-22[npm]
-	!bundled-codex? ( dev-util/codex )
+	!bundled-codex? ( !external-codex? ( dev-util/codex ) )
 "
 BDEPEND="${RDEPEND}"
 
@@ -66,19 +67,22 @@ src_install() {
 			[[ -e ${bundled} ]] || continue
 			rm -rf "${bundled}" || die "could not remove bundled Codex CLI"
 		done
-		# Point the adapter at the system Codex unless the operator already set CODEX_PATH.
-		rm -f "${ED}/usr/bin/codex-acp" || die "could not remove npm bin"
-		local entries=( "${ED}"/usr/lib*/node_modules/@agentclientprotocol/codex-acp/dist/index.js )
-		[[ ${#entries[@]} -eq 1 && -f ${entries[0]} ]] || die "adapter entrypoint missing"
-		local entry="${entries[0]#"${ED}"}"
-		cat > "${T}/codex-acp" <<EOF || die "could not write codex-acp wrapper"
+		# external-codex leaves the npm bin. The operator sets CODEX_PATH.
+		if ! use external-codex; then
+			# Point the adapter at the system Codex unless the operator already set CODEX_PATH.
+			rm -f "${ED}/usr/bin/codex-acp" || die "could not remove npm bin"
+			local entries=( "${ED}"/usr/lib*/node_modules/@agentclientprotocol/codex-acp/dist/index.js )
+			[[ ${#entries[@]} -eq 1 && -f ${entries[0]} ]] || die "adapter entrypoint missing"
+			local entry="${entries[0]#"${ED}"}"
+			cat > "${T}/codex-acp" <<EOF || die "could not write codex-acp wrapper"
 #!/bin/sh
 if [ -z "\${CODEX_PATH+x}" ]; then
 	export CODEX_PATH=/usr/bin/codex
 fi
 exec node "${entry}" "\$@"
 EOF
-		dobin "${T}/codex-acp"
+			dobin "${T}/codex-acp"
+		fi
 	fi
 }
 
