@@ -338,26 +338,26 @@ def replace_once(path, old, new):
 
 replace_once(
     "src/startup/active-image.lisp",
-    """             (platform-setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root))
-             (restart-case
-                 (main (rest arguments))""",
-    """             (platform-setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root))
-             (uiop:symbol-call '#:autolith-gentoo-fhs
-                               '#:relocate-to-live-source-root
-                               source-root)
-             (restart-case
-                 (main (rest arguments))""",
+    """        (platform-setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root))
+        (restart-case
+            (main (rest arguments))""",
+    """        (platform-setenv "AUTOLITH_SOURCE_ROOT" (namestring source-root))
+        (uiop:symbol-call '#:autolith-gentoo-fhs
+                          '#:relocate-to-live-source-root
+                          source-root)
+        (restart-case
+            (main (rest arguments))""",
 )
 
 replace_once(
     "src/startup/active-image.lisp",
-    """        (sb-ext:save-lisp-and-die
-         (namestring pathname)
-         :toplevel #'active-image-main""",
-    """        (uiop:symbol-call '#:autolith-gentoo-fhs '#:stash-dump-source-root)
-        (sb-ext:save-lisp-and-die
-         (namestring pathname)
-         :toplevel #'active-image-main""",
+    '''(defun active-image--prepare-saver ()
+  "Clear this process's session and credential state before it is saved."
+  (setf *active-application* nil''',
+    '''(defun active-image--prepare-saver ()
+  "Clear this process's session and credential state before it is saved."
+  (uiop:symbol-call '#:autolith-gentoo-fhs '#:stash-dump-source-root)
+  (setf *active-application* nil''',
 )
 
 replace_once(

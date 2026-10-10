@@ -12,4 +12,4 @@ RESTRICT=!test? ( test )
 SLOT=0
 SRC_URI=https://github.com/luciusmagn/autolith/archive/refs/tags/v0.60.0.tar.gz -> autolith-0.60.0.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/autolith-0.60.0/autolith-0.60.0-deps.tar.xz
 _eclasses_=toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
-_md5_=b389d140e58e8287f8e89572c41c1505
+_md5_=ea6af9dccf14a045f2e10405c06fb549
