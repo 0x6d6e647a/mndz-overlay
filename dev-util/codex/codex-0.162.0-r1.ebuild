@@ -132,8 +132,8 @@ src_prepare() {
 		-e "s#${marker}()?#std::env::var(\"PROTOC\").unwrap_or_else(|_| \"/usr/bin/protoc\".into())#" \
 		"${build_rs}" || die
 
-	# Windows-only microsoft/mxc is omitted from GIT_CRATES, but Cargo still
-	# resolves the workspace git pin for appcontainer_common --offline.
+	# Windows-only microsoft/mxc crates are omitted from GIT_CRATES, but Cargo
+	# still resolves their workspace git pins --offline. Point them at empty stubs.
 	mkdir -p "${WORKDIR}/appcontainer_common_stub/src" || die
 	cat > "${WORKDIR}/appcontainer_common_stub/Cargo.toml" <<-EOF || die
 		[package]
@@ -143,29 +143,83 @@ src_prepare() {
 	EOF
 	: > "${WORKDIR}/appcontainer_common_stub/src/lib.rs" || die
 
+	mkdir -p "${WORKDIR}/learning_mode_windows_stub/src" || die
+	cat > "${WORKDIR}/learning_mode_windows_stub/Cargo.toml" <<-EOF || die
+		[package]
+		name = "learning_mode_windows"
+		version = "0.8.0"
+		edition = "2021"
+	EOF
+	: > "${WORKDIR}/learning_mode_windows_stub/src/lib.rs" || die
+
 	# crates.io v8 is not a from-source tree; path-patch onto the rusty_v8 snapshot.
-	# cargo.eclass writes [patch] into CARGO_HOME/config.toml, but Cargo 1.96
-	# ignores that and still fetches [patch.crates-io] git= remotes --offline.
-	# Rewrite those git pins (and workspace git deps) to unpacked GIT_CRATES paths.
-	python3 - "${WORKDIR}" "${S}/Cargo.toml" <<'PY' || die "rewrite Cargo.toml git crates to paths"
+	# cargo.eclass writes [patch] into CARGO_HOME/config.toml. On Cargo 1.97 that
+	# does not satisfy a git dependency listed in the workspace [patch.crates-io]
+	# table. Rewrite crossterm, tokio-tungstenite, and tungstenite from this
+	# ebuild's GIT_CRATES entry so the commit and checkout path stay together.
+	local crate_commit crate_dir
+	local crossterm_commit crossterm_dir
+	local tokio_tungstenite_commit tokio_tungstenite_dir
+	local tungstenite_commit tungstenite_dir
+	codex_git_crate() {
+		local name=$1 spec
+		[[ -v GIT_CRATES["${name}"] ]] || die "GIT_CRATES missing ${name}"
+		spec="${GIT_CRATES["${name}"]}"
+		IFS=';' read -r _ crate_commit crate_dir _ <<< "${spec}"
+		[[ -n ${crate_commit} && -n ${crate_dir} ]] ||
+			die "GIT_CRATES ${name} has no commit and directory"
+		crate_dir=${crate_dir//%commit%/${crate_commit}}
+	}
+	codex_git_crate crossterm
+	crossterm_commit="${crate_commit}"
+	crossterm_dir="${crate_dir}"
+	codex_git_crate tokio-tungstenite
+	tokio_tungstenite_commit="${crate_commit}"
+	tokio_tungstenite_dir="${crate_dir}"
+	codex_git_crate tungstenite
+	tungstenite_commit="${crate_commit}"
+	tungstenite_dir="${crate_dir}"
+
+	python3 - "${WORKDIR}" "${S}/Cargo.toml" \
+		crossterm "${crossterm_commit}" "${WORKDIR}/${crossterm_dir}" \
+		tokio-tungstenite "${tokio_tungstenite_commit}" "${WORKDIR}/${tokio_tungstenite_dir}" \
+		tungstenite "${tungstenite_commit}" "${WORKDIR}/${tungstenite_dir}" \
+		<<'PY' || die "rewrite Cargo.toml git crates to paths"
+import re
 import sys
 from pathlib import Path
 
 workdir, toml_path = sys.argv[1], Path(sys.argv[2])
+pin_args = sys.argv[3:]
+if len(pin_args) % 3 != 0:
+    sys.exit("git pin arguments are not name, commit, path triples")
 text = toml_path.read_text()
+
+
+def rewrite_pin(text, name, commit, path):
+    pattern = re.compile(
+        rf'^(?P<indent>[ \t]*){re.escape(name)}[ \t]*=[ \t]*\{{(?=[^\n]*\bgit[ \t]*=)[^\n]*\brev[ \t]*=[ \t]*"{re.escape(commit)}"[^\n]*\}}$',
+        re.MULTILINE,
+    )
+
+    def repl(match):
+        indent = match.group("indent")
+        return f'{indent}{name} = {{ path = "{path}" }}'
+
+    new, count = pattern.subn(repl, text)
+    if count == 0:
+        sys.exit(
+            "expected git crate snippet missing from Cargo.toml: "
+            f"{name} rev {commit}"
+        )
+    return new
+
+
+for index in range(0, len(pin_args), 3):
+    pin_name, pin_commit, pin_path = pin_args[index : index + 3]
+    text = rewrite_pin(text, pin_name, pin_commit, pin_path)
+
 subs = [
-    (
-        'crossterm = { git = "https://github.com/openai-oss-forks/crossterm", rev = "45fecb9508105988f42fe6ff0441783ed3717f92" }',
-        f'crossterm = {{ path = "{workdir}/crossterm-45fecb9508105988f42fe6ff0441783ed3717f92" }}',
-    ),
-    (
-        'tokio-tungstenite = { git = "https://github.com/openai-oss-forks/tokio-tungstenite", rev = "0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186" }',
-        f'tokio-tungstenite = {{ path = "{workdir}/tokio-tungstenite-0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186" }}',
-    ),
-    (
-        'tungstenite = { git = "https://github.com/openai-oss-forks/tungstenite-rs", rev = "4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }',
-        f'tungstenite = {{ path = "{workdir}/tungstenite-rs-4fffad30fe373adbdcffab9545e9e9bf4f2fc19f" }}',
-    ),
     (
         'nucleo = { git = "https://github.com/helix-editor/nucleo.git", rev = "4253de9faabb4e5c6d81d946a5e35a90f87347ee" }',
         f'nucleo = {{ path = "{workdir}/nucleo-4253de9faabb4e5c6d81d946a5e35a90f87347ee" }}',
@@ -177,6 +231,10 @@ subs = [
     (
         'appcontainer_common = { git = "https://github.com/microsoft/mxc", rev = "6cd3d58f05d3447e67109cfb75e042803b843ca4" }',
         f'appcontainer_common = {{ path = "{workdir}/appcontainer_common_stub" }}',
+    ),
+    (
+        'learning_mode_windows = { git = "https://github.com/microsoft/mxc", rev = "6cd3d58f05d3447e67109cfb75e042803b843ca4" }',
+        f'learning_mode_windows = {{ path = "{workdir}/learning_mode_windows_stub" }}',
     ),
 ]
 for old, new in subs:
@@ -195,9 +253,9 @@ toml_path.write_text(text)
 PY
 	local git_toml
 	for git_toml in \
-		"${WORKDIR}/crossterm-45fecb9508105988f42fe6ff0441783ed3717f92/Cargo.toml" \
-		"${WORKDIR}/tokio-tungstenite-0e5b2d73aa18dd9f0a50ee9ff199d5aef7594186/Cargo.toml" \
-		"${WORKDIR}/tungstenite-rs-4fffad30fe373adbdcffab9545e9e9bf4f2fc19f/Cargo.toml" \
+		"${WORKDIR}/${crossterm_dir}/Cargo.toml" \
+		"${WORKDIR}/${tokio_tungstenite_dir}/Cargo.toml" \
+		"${WORKDIR}/${tungstenite_dir}/Cargo.toml" \
 		"${WORKDIR}/nucleo-4253de9faabb4e5c6d81d946a5e35a90f87347ee/Cargo.toml" \
 		"${WORKDIR}/nucleo-4253de9faabb4e5c6d81d946a5e35a90f87347ee/matcher/Cargo.toml" \
 		"${WORKDIR}/rules_rust-b56cbaa8465e74127f1ea216f813cd377295ad81/rust/runfiles/Cargo.toml" \
