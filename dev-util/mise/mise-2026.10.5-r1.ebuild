@@ -53,6 +53,8 @@ src_configure() {
 	# Prefer system OpenSSL/zstd (not crate-vendored).
 	export OPENSSL_NO_VENDOR=1
 	export ZSTD_SYS_USE_PKG_CONFIG=1
+	# aws-lc-sys jitterentropy #errors when Portage -O2 follows the crate -O0.
+	export AWS_LC_SYS_NO_JITTER_ENTROPY=1
 
 	# Defaults are native-tls + vfox/vendored-lua + self_update.
 	# Distro packaging: system TLS + system Lua, no self-update.
