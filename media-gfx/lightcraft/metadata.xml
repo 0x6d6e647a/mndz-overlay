@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="cli">Build and install the lightcraft-cli program</flag>
+		<flag name="heif">Build HEIF and HEIC support</flag>
+		<flag name="portal">
+			Use xdg-desktop-portal for file dialogs. Without this flag,
+			dialogs use gnome-base/zenity
+		</flag>
+		<flag name="rawnind-model">Bundle the Rawnind noise model</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/storytold/lightcraft/issues</bugs-to>
+		<remote-id type="github">storytold/lightcraft</remote-id>
+	</upstream>
+</pkgmetadata>
