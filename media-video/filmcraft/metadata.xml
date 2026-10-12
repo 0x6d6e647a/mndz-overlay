@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="cli">Build and install the filmcraft-cli program</flag>
+		<flag name="nvenc">Link against the NVIDIA NVENC driver stack</flag>
+		<flag name="portal">
+			Use xdg-desktop-portal for file dialogs. Without this flag,
+			dialogs use gnome-base/zenity
+		</flag>
+		<flag name="whisper">Build the offline speech feature</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/storytold/filmcraft/issues</bugs-to>
+		<remote-id type="github">storytold/filmcraft</remote-id>
+	</upstream>
+</pkgmetadata>
