@@ -18,6 +18,7 @@ DESCRIPTION="Open-source native PDF tool"
 HOMEPAGE="https://getartcraft.com/apps/pdfcraft https://github.com/storytold/pdfcraft"
 SRC_URI="https://github.com/storytold/pdfcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
 SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/pdfcraft-${PV}/pdfcraft-${PV}-crates.tar.xz"
+SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
