@@ -42,6 +42,7 @@ DESCRIPTION="Open-source native visual effects compositor"
 HOMEPAGE="https://getartcraft.com/apps/effectcraft https://github.com/storytold/effectcraft"
 SRC_URI="https://github.com/storytold/effectcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
 SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/effectcraft-${PV}/effectcraft-${PV}-crates.tar.xz"
+SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
