@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="cli">Build and install the figcraft-cli program</flag>
+		<flag name="portal">
+			Use xdg-desktop-portal for file dialogs. Without this flag,
+			dialogs use gnome-base/zenity
+		</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/storytold/figcraft/issues</bugs-to>
+		<remote-id type="github">storytold/figcraft</remote-id>
+	</upstream>
+</pkgmetadata>
