@@ -17,6 +17,7 @@ DESCRIPTION="Open-source native audio workstation"
 HOMEPAGE="https://getartcraft.com/apps/soundcraft https://github.com/storytold/soundcraft"
 SRC_URI="https://github.com/storytold/soundcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
 SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/soundcraft-${PV}/soundcraft-${PV}-crates.tar.xz"
+SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
@@ -58,6 +59,20 @@ RDEPEND="
 		dev-libs/wayland
 	)
 "
+
+src_prepare() {
+	default
+
+	# The VST3 test loads the first libz.so.1 it finds and expects a missing
+	# GetPluginFactory. Gentoo multilib has ELF32 at /usr/lib and ELF64 in lib64,
+	# so the original order dlopens the 32-bit library and dies with ELFCLASS32.
+	local test_rs="${S}/crates/vst3-host/src/lib.rs"
+	local old='"/lib/x86_64-linux-gnu/libz.so.1", "/usr/lib/libz.so.1", "/lib64/libz.so.1"'
+	local new='"/lib/x86_64-linux-gnu/libz.so.1", "/usr/lib64/libz.so.1", "/lib64/libz.so.1", "/usr/lib/libz.so.1"'
+	grep -q -F "${old}" "${test_rs}" ||
+		die "libz probe missing from ${test_rs}; update src_prepare"
+	sed -i "s|${old}|${new}|" "${test_rs}" || die
+}
 
 src_compile() {
 	local -a pkgs=()
