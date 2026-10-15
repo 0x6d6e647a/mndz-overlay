@@ -18,6 +18,7 @@ DESCRIPTION="Open-source native vector editor"
 HOMEPAGE="https://getartcraft.com/apps/vectorcraft https://github.com/storytold/vectorcraft"
 SRC_URI="https://github.com/storytold/vectorcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
 SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/vectorcraft-${PV}/vectorcraft-${PV}-crates.tar.xz"
+SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
