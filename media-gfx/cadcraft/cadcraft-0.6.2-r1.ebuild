@@ -17,6 +17,7 @@ DESCRIPTION="Open-source native 2D CAD"
 HOMEPAGE="https://getartcraft.com/apps/cadcraft https://github.com/storytold/cadcraft"
 SRC_URI="https://github.com/storytold/cadcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
 SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/cadcraft-${PV}/cadcraft-${PV}-crates.tar.xz"
+SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
