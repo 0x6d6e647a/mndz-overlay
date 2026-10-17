@@ -17,7 +17,7 @@ declare -A GIT_CRATES=(
 	[winit]='https://github.com/skylartaylor/winit;3d51077fd1a966f84df9ef287839dc84fd5b4ca7;winit-%commit%'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native page layout"
 HOMEPAGE="https://getartcraft.com/apps/designcraft https://github.com/storytold/designcraft"
@@ -49,7 +49,7 @@ RDEPEND="
 		media-libs/vulkan-loader
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11

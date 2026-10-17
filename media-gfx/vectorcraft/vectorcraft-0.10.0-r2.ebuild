@@ -8,23 +8,26 @@ RUST_MIN_VER="1.95.0"
 CRATES=""
 
 declare -A GIT_CRATES=(
+	[craft-print]='https://github.com/storytold/craft-libs;d991bf6792f8ade99c51358bf3c1d902c8cd96b5;craft-libs-%commit%/crates/print'
 	[craft-ui]='https://github.com/storytold/craft-libs;5c874d51eeb3de70e735c8ce87a59a7dedd47675;craft-libs-%commit%/crates/ui'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
-DESCRIPTION="Open-source native 2D CAD"
-HOMEPAGE="https://getartcraft.com/apps/cadcraft https://github.com/storytold/cadcraft"
-SRC_URI="https://github.com/storytold/cadcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/cadcraft-${PV}/cadcraft-${PV}-crates.tar.xz"
+DESCRIPTION="Open-source native vector editor"
+HOMEPAGE="https://getartcraft.com/apps/vectorcraft https://github.com/storytold/vectorcraft"
+SRC_URI="https://github.com/storytold/vectorcraft/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+SRC_URI+=" https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/vectorcraft-${PV}/vectorcraft-${PV}-crates.tar.xz"
 SRC_URI+=" ${CARGO_CRATE_URIS}"
 
 LICENSE="|| ( MIT Apache-2.0 )"
 # Dependent crate licenses
 LICENSE+="
-	Apache-2.0 BSD-2 BSD Boost-1.0 ISC MIT MPL-2.0 OFL-1.1
+	Apache-2.0 BSD-2 BSD Boost-1.0 IJG ISC MIT MPL-2.0 OFL-1.1
 	UbuntuFontLicense-1.0 Unicode-3.0 ZLIB
 "
+# assets/icons embeds Lucide SVGs (ISC). Feather-derived icons are MIT.
+LICENSE+="ISC"
 SLOT="0"
 KEYWORDS="-* ~amd64 ~arm ~arm64 ~loong ~ppc64 ~riscv ~s390 ~sparc ~x86"
 IUSE="+gui +cli +portal +X +wayland test"
@@ -40,7 +43,7 @@ RDEPEND="
 		media-libs/vulkan-loader
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11
@@ -56,29 +59,29 @@ RDEPEND="
 
 src_compile() {
 	local -a pkgs=()
-	use gui && pkgs+=( -p cadcraft )
-	use cli && pkgs+=( -p cadcraft-cli )
+	use gui && pkgs+=( -p vectorcraft )
+	use cli && pkgs+=( -p vectorcraft-cli )
 	cargo_src_compile "${pkgs[@]}"
 }
 
 src_test() {
 	# cargo_src_test would forward a package selection and drop the library crates.
-	cargo_src_test --workspace --exclude cadcraft-web --exclude xtask
+	cargo_src_test --workspace --exclude vectorcraft-web --exclude xtask
 }
 
 src_install() {
 	# cargo install rejects -p. src_compile already built the selected bins.
-	use gui && dobin "$(cargo_target_dir)/cadcraft"
-	use cli && dobin "$(cargo_target_dir)/cadcraft-cli"
+	use gui && dobin "$(cargo_target_dir)/vectorcraft"
+	use cli && dobin "$(cargo_target_dir)/vectorcraft-cli"
 
-	use gui && QA_FLAGS_IGNORED+=" usr/bin/cadcraft"
-	use cli && QA_FLAGS_IGNORED+=" usr/bin/cadcraft-cli"
+	use gui && QA_FLAGS_IGNORED+=" usr/bin/vectorcraft"
+	use cli && QA_FLAGS_IGNORED+=" usr/bin/vectorcraft-cli"
 
 	if use gui; then
-		domenu packaging/linux/ai.storyteller.cadcraft.desktop
+		domenu packaging/linux/ai.storyteller.vectorcraft.desktop
 		insinto /usr/share/mime/packages
-		newins packaging/linux/ai.storyteller.cadcraft.mime.xml \
-			ai.storyteller.cadcraft.xml
+		newins packaging/linux/ai.storyteller.vectorcraft.mime.xml \
+			ai.storyteller.vectorcraft.xml
 
 		local rel_date
 		if [[ -n ${SOURCE_DATE_EPOCH} ]]; then
@@ -87,19 +90,19 @@ src_install() {
 			rel_date=$(date -u +%Y-%m-%d) || die
 		fi
 		sed -e "s/@VERSION@/${PV}/g" -e "s/@DATE@/${rel_date}/g" \
-			packaging/linux/ai.storyteller.cadcraft.metainfo.xml.in \
-			> "${T}"/ai.storyteller.cadcraft.metainfo.xml || die
+			packaging/linux/ai.storyteller.vectorcraft.metainfo.xml.in \
+			> "${T}"/ai.storyteller.vectorcraft.metainfo.xml || die
 		insinto /usr/share/metainfo
-		doins "${T}"/ai.storyteller.cadcraft.metainfo.xml
+		doins "${T}"/ai.storyteller.vectorcraft.metainfo.xml
 
 		local sz
 		for sz in 16 24 32 48 64 128 256 512; do
 			doicon -s "${sz}" \
-				"assets/app-icon/hicolor/${sz}x${sz}/apps/ai.storyteller.cadcraft.png"
+				"assets/app-icon/hicolor/${sz}x${sz}/apps/ai.storyteller.vectorcraft.png"
 		done
-		if [[ -f assets/app-icon/hicolor/scalable/apps/ai.storyteller.cadcraft.svg ]]; then
+		if [[ -f assets/app-icon/hicolor/scalable/apps/ai.storyteller.vectorcraft.svg ]]; then
 			doicon -s scalable \
-				assets/app-icon/hicolor/scalable/apps/ai.storyteller.cadcraft.svg
+				assets/app-icon/hicolor/scalable/apps/ai.storyteller.vectorcraft.svg
 		fi
 	fi
 }
