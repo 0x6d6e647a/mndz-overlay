@@ -12,7 +12,7 @@ declare -A GIT_CRATES=(
 	[craft-ui]='https://github.com/storytold/craft-libs;d27646a5f7c8b4fc85d9dd3213b8c88b58e0088d;craft-libs-%commit%/crates/ui'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native spreadsheet"
 HOMEPAGE="https://getartcraft.com/apps/gridcraft https://github.com/storytold/gridcraft"
@@ -41,7 +41,7 @@ RDEPEND="
 		media-libs/vulkan-loader
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11
