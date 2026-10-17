@@ -13,7 +13,7 @@ declare -A GIT_CRATES=(
 	[winprint]='https://github.com/storytold/winprint.rs;5f80b9baf6b58937c401656634e42d33f00ddf49;winprint.rs-%commit%'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native PDF tool"
 HOMEPAGE="https://getartcraft.com/apps/pdfcraft https://github.com/storytold/pdfcraft"
@@ -51,7 +51,7 @@ RDEPEND="
 		media-libs/vulkan-loader
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11
