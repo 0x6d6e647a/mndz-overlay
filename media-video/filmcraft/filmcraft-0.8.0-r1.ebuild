@@ -11,7 +11,7 @@ declare -A GIT_CRATES=(
 	[craft-ui]='https://github.com/storytold/craft-libs;5c874d51eeb3de70e735c8ce87a59a7dedd47675;craft-libs-%commit%/crates/ui'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native video editor"
 HOMEPAGE="https://getartcraft.com/apps/filmcraft https://github.com/storytold/filmcraft"
@@ -48,7 +48,7 @@ RDEPEND="
 		x11-misc/xdg-utils
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	vaapi? ( media-libs/libva )
 	nvenc? ( x11-drivers/nvidia-drivers )
