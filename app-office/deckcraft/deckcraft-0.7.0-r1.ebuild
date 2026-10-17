@@ -7,7 +7,7 @@ RUST_MIN_VER="1.95.0"
 
 CRATES=""
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native slide decks"
 HOMEPAGE="https://getartcraft.com/apps/deckcraft https://github.com/storytold/deckcraft"
@@ -43,7 +43,7 @@ RDEPEND="
 		media-libs/vulkan-loader
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11
