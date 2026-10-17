@@ -37,7 +37,7 @@ declare -A GIT_CRATES=(
 	[filmcraft-vp9]='https://github.com/storytold/filmcraft;2c5ba7a72619935f0481f99d59409e0d1844b234;filmcraft-%commit%/crates/vp9'
 )
 
-inherit cargo xdg
+inherit cargo desktop xdg
 
 DESCRIPTION="Open-source native visual effects compositor"
 HOMEPAGE="https://getartcraft.com/apps/effectcraft https://github.com/storytold/effectcraft"
@@ -73,7 +73,7 @@ RDEPEND="
 		x11-misc/xdg-utils
 		x11-libs/libxkbcommon
 		portal? ( sys-apps/xdg-desktop-portal )
-		!portal? ( gnome-base/zenity )
+		!portal? ( gnome-extra/zenity )
 	)
 	X? (
 		x11-libs/libX11
