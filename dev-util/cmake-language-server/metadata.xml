@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<upstream>
+		<bugs-to>https://github.com/regen100/cmake-language-server/issues</bugs-to>
+		<remote-id type="github">regen100/cmake-language-server</remote-id>
+	</upstream>
+	<use>
+		<flag name="format">Install cmake-format from the locked cmakelang and six wheels</flag>
+	</use>
+</pkgmetadata>

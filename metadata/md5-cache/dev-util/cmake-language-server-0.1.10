@@ -1,0 +1,17 @@
+BDEPEND=python_single_target_python3_12? ( dev-lang/python:3.12 ) dev-lang/python:3.12 dev-build/cmake dev-python/pdm
+DEFINED_PHASES=install prepare setup test unpack
+DEPEND=python_single_target_python3_12? ( dev-lang/python:3.12 ) dev-lang/python:3.12 dev-build/cmake
+DESCRIPTION=CMake LSP Implementation
+EAPI=8
+HOMEPAGE=https://github.com/regen100/cmake-language-server
+INHERIT=python-single-r1
+IUSE=+format test +python_single_target_python3_12
+KEYWORDS=~alpha ~amd64 ~arm ~arm64 ~hppa ~loong ~m68k ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86
+LICENSE=MIT
+RDEPEND=python_single_target_python3_12? ( dev-lang/python:3.12 ) dev-lang/python:3.12 dev-build/cmake
+REQUIRED_USE=^^ ( python_single_target_python3_12 )
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://github.com/regen100/cmake-language-server/archive/refs/tags/v0.1.10.tar.gz -> cmake-language-server-0.1.10.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/cmake-language-server-0.1.10/cmake-language-server-0.1.10-deps.tar.xz
+_eclasses_=eapi9-pipestatus	d2c134036ac31c3085aebc9147f572bd	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	python-single-r1	47d8ac9be330c9366112b78fd4f8ce57	python-utils-r1	025367880f07ae6444e6035a49db0dab	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=2617d08e4f74efafe59d9847f09ea52b
