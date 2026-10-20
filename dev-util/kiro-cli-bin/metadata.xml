@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription lang="en">
+		Kiro CLI is the prebuilt command-line agent. This package installs
+		kiro-cli, kiro-cli-chat, and kiro-cli-term under /usr/bin from the
+		headless archive selected by the profile libc.
+	</longdescription>
+	<upstream>
+		<bugs-to>https://github.com/kirodotdev/Kiro/issues</bugs-to>
+		<remote-id type="website">https://kiro.dev/cli</remote-id>
+	</upstream>
+</pkgmetadata>
