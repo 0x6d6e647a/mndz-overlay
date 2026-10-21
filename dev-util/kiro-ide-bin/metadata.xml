@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription lang="en">
+		Kiro IDE is the prebuilt desktop editor. This package installs the
+		unpacked Kiro tree at /usr/share/kiro and the kiro command at /usr/bin.
+	</longdescription>
+	<upstream>
+		<bugs-to>https://github.com/kirodotdev/Kiro/issues</bugs-to>
+		<remote-id type="website">https://kiro.dev/</remote-id>
+	</upstream>
+</pkgmetadata>
