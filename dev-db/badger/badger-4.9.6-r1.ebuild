@@ -49,6 +49,8 @@ src_compile() {
 		[[ -d ${jemalloc_src} ]] || die "jemalloc source not found at ${jemalloc_src}"
 
 		pushd "${jemalloc_src}" >/dev/null || die
+		# GCC 16 no longer declares std::__throw_bad_alloc from <new> (bug 967868).
+		eapply "${FILESDIR}/jemalloc-5.3.0-dont-call-libstdcxx-internals.patch"
 		econf \
 			--prefix="${je}" \
 			--libdir="${je}/lib" \
