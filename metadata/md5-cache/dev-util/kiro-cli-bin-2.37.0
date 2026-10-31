@@ -1,0 +1,11 @@
+DEFINED_PHASES=install postinst
+DESCRIPTION=Kiro CLI coding agent (prebuilt binaries)
+EAPI=8
+HOMEPAGE=https://kiro.dev/cli
+KEYWORDS=-* ~amd64 ~arm64
+LICENSE=all-rights-reserved
+RDEPEND=elibc_glibc? ( >=sys-libs/glibc-2.34 )
+RESTRICT=bindist mirror strip
+SLOT=0
+SRC_URI=amd64? ( elibc_glibc? ( https://desktop-release.q.us-east-1.amazonaws.com/2.37.0/kirocli-x86_64-linux.tar.xz -> kirocli-2.37.0-x86_64-linux.tar.xz ) elibc_musl? ( https://desktop-release.q.us-east-1.amazonaws.com/2.37.0/kirocli-x86_64-linux-musl.tar.xz -> kirocli-2.37.0-x86_64-linux-musl.tar.xz ) ) arm64? ( elibc_glibc? ( https://desktop-release.q.us-east-1.amazonaws.com/2.37.0/kirocli-aarch64-linux.tar.xz -> kirocli-2.37.0-aarch64-linux.tar.xz ) elibc_musl? ( https://desktop-release.q.us-east-1.amazonaws.com/2.37.0/kirocli-aarch64-linux-musl.tar.xz -> kirocli-2.37.0-aarch64-linux-musl.tar.xz ) )
+_md5_=235b8d8cc8db25f9373ad1c57c425f9e
