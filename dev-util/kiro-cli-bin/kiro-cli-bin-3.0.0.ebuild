@@ -10,22 +10,22 @@ HOMEPAGE="https://kiro.dev/cli"
 SRC_URI="
 	amd64? (
 		elibc_glibc? (
-			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-x86_64-linux.tar.xz
-				-> kirocli-${PV}-x86_64-linux.tar.xz
+			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-x86_64-linux.tar.gz
+				-> kirocli-${PV}-x86_64-linux.tar.gz
 		)
 		elibc_musl? (
-			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-x86_64-linux-musl.tar.xz
-				-> kirocli-${PV}-x86_64-linux-musl.tar.xz
+			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-x86_64-linux-musl.tar.gz
+				-> kirocli-${PV}-x86_64-linux-musl.tar.gz
 		)
 	)
 	arm64? (
 		elibc_glibc? (
-			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-aarch64-linux.tar.xz
-				-> kirocli-${PV}-aarch64-linux.tar.xz
+			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-aarch64-linux.tar.gz
+				-> kirocli-${PV}-aarch64-linux.tar.gz
 		)
 		elibc_musl? (
-			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-aarch64-linux-musl.tar.xz
-				-> kirocli-${PV}-aarch64-linux-musl.tar.xz
+			https://desktop-release.q.us-east-1.amazonaws.com/${PV}/kirocli-aarch64-linux-musl.tar.gz
+				-> kirocli-${PV}-aarch64-linux-musl.tar.gz
 		)
 	)
 "
@@ -35,7 +35,7 @@ SLOT="0"
 KEYWORDS="-* ~amd64 ~arm64"
 RESTRICT="bindist mirror strip"
 
-QA_PREBUILT="usr/bin/kiro-cli usr/bin/kiro-cli-chat usr/bin/kiro-cli-term"
+QA_PREBUILT="usr/bin/kiro-cli"
 
 RDEPEND="elibc_glibc? ( >=sys-libs/glibc-2.34 )"
 
@@ -43,7 +43,7 @@ S="${WORKDIR}/kirocli"
 
 src_install() {
 	exeinto /usr/bin
-	doexe bin/kiro-cli bin/kiro-cli-chat bin/kiro-cli-term
+	doexe bin/kiro-cli
 }
 
 pkg_postinst() {
