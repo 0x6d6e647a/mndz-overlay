@@ -1,0 +1,15 @@
+BDEPEND=test? ( dev-vcs/git ) || ( >=dev-lang/rust-bin-1.90.0:* >=dev-lang/rust-1.90.0:* )
+DEFINED_PHASES=compile configure install prepare setup test unpack
+DESCRIPTION=Cargo subcommand for LLVM source-based code coverage
+EAPI=8
+HOMEPAGE=https://github.com/taiki-e/cargo-llvm-cov
+INHERIT=cargo
+IUSE=test debug
+KEYWORDS=~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~s390 ~sparc ~x86
+LICENSE=|| ( Apache-2.0 MIT ) Apache-2.0 MIT Unicode-3.0
+RDEPEND=llvm-core/llvm
+RESTRICT=!test? ( test )
+SLOT=0
+SRC_URI=https://github.com/taiki-e/cargo-llvm-cov/archive/refs/tags/v0.9.1.tar.gz -> cargo-llvm-cov-0.9.1.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/cargo-llvm-cov-0.9.1/cargo-llvm-cov-0.9.1-crates.tar.xz https://github.com/taiki-e/test-helper/archive/82e3b012a49fb16587e165986674290ef682a5b0.tar.gz -> test-helper-82e3b012a49fb16587e165986674290ef682a5b0.gh.tar.gz
+_eclasses_=cargo	f37054abdadccfe8287ecf965ef5748f	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	8a2beaaa77fb7c96f815f713b6920298	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_md5_=493562950c8fa75c8ea95c2f7e257b4c
