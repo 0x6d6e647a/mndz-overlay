@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<upstream>
+		<bugs-to>https://github.com/taiki-e/cargo-llvm-cov/issues</bugs-to>
+		<remote-id type="github">taiki-e/cargo-llvm-cov</remote-id>
+		<remote-id type="crates">cargo-llvm-cov</remote-id>
+	</upstream>
+</pkgmetadata>

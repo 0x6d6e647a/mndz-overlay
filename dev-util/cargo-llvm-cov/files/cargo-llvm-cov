@@ -1,0 +1,62 @@
+#!/bin/sh
+# Point LLVM_COV and LLVM_PROFDATA at the llvm-core/llvm slot that matches
+# the running rustc, when those variables are unset. A path this lookup
+# would set must exist; otherwise it returns non-zero and does not exec.
+#
+# src_test sources this file and calls cargo_llvm_cov_lookup. Running the
+# file as /usr/bin/cargo-llvm-cov execs the real binary afterwards.
+
+cargo_llvm_cov_lookup() {
+	_need_cov=0
+	_need_prof=0
+	if [ -z "${LLVM_COV:-}" ]; then
+		_need_cov=1
+	fi
+	if [ -z "${LLVM_PROFDATA:-}" ]; then
+		_need_prof=1
+	fi
+	if [ "${_need_cov}" -eq 0 ] && [ "${_need_prof}" -eq 0 ]; then
+		return 0
+	fi
+
+	_rustc=$(command -v rustc) || {
+		echo "cargo-llvm-cov: rustc is not on PATH" >&2
+		return 1
+	}
+	_llvm_text=$("${_rustc}" -vV) || {
+		echo "cargo-llvm-cov: ${_rustc} -vV failed" >&2
+		return 1
+	}
+	_llvm_line=$(printf '%s\n' "${_llvm_text}" | sed -n 's/^LLVM version: //p' | head -n 1)
+	_major=${_llvm_line%%.*}
+	case "${_major}" in
+		''|*[!0-9]*)
+			echo "cargo-llvm-cov: ${_rustc} did not report an LLVM major version" >&2
+			return 1
+			;;
+	esac
+
+	if [ "${_need_cov}" -eq 1 ]; then
+		LLVM_COV="/usr/lib/llvm/${_major}/bin/llvm-cov"
+		if [ ! -e "${LLVM_COV}" ]; then
+			echo "cargo-llvm-cov: ${_rustc} reports LLVM ${_llvm_line}, but ${LLVM_COV} does not exist" >&2
+			return 1
+		fi
+		export LLVM_COV
+	fi
+	if [ "${_need_prof}" -eq 1 ]; then
+		LLVM_PROFDATA="/usr/lib/llvm/${_major}/bin/llvm-profdata"
+		if [ ! -e "${LLVM_PROFDATA}" ]; then
+			echo "cargo-llvm-cov: ${_rustc} reports LLVM ${_llvm_line}, but ${LLVM_PROFDATA} does not exist" >&2
+			return 1
+		fi
+		export LLVM_PROFDATA
+	fi
+}
+
+case "$(basename -- "$0")" in
+	cargo-llvm-cov)
+		cargo_llvm_cov_lookup || exit 1
+		exec /usr/libexec/cargo-llvm-cov/cargo-llvm-cov "$@"
+		;;
+esac
