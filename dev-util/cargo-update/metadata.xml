@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="system-openssl">Link against the system OpenSSL. Otherwise build the vendored copy.</flag>
+		<flag name="system-libgit2">Link against system libgit2 1.9.x. Otherwise build the vendored copy.</flag>
+		<flag name="system-libcurl">Link against the system libcurl. Otherwise build the vendored copy.</flag>
+		<flag name="libsecret">Install with a runtime dependency on libsecret for registry credentials.</flag>
+		<flag name="man">Install man pages rendered from the upstream markdown.</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/nabijaczleweli/cargo-update/issues</bugs-to>
+		<remote-id type="github">nabijaczleweli/cargo-update</remote-id>
+		<remote-id type="crates">cargo-update</remote-id>
+	</upstream>
+</pkgmetadata>
