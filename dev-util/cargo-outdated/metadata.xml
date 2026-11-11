@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<use>
+		<flag name="system-openssl">Link against the system OpenSSL. Otherwise build the bundled copy. Disabling it requires the bundled libcurl, libgit2, and libssh2, so system-libcurl, system-libgit2, and system-libssh2 must be disabled too.</flag>
+		<flag name="system-libcurl">Link against the system libcurl. Otherwise build the bundled copy, which requires the bundled OpenSSL (system-openssl disabled) and the bundled zlib (system-zlib disabled).</flag>
+		<flag name="system-libgit2">Link against system libgit2 1.9.x. Otherwise build the bundled copy. Requires system-libssh2, because the system libgit2 brings its own libssh2.</flag>
+		<flag name="system-libssh2">Link against the system libssh2. Otherwise build the bundled copy.</flag>
+		<flag name="system-zlib">Link against the system zlib. Otherwise build the bundled copy.</flag>
+		<flag name="system-sqlite">Link against the system SQLite. Otherwise build the bundled copy.</flag>
+		<flag name="libsecret">Install with a runtime dependency on libsecret for registry credentials.</flag>
+	</use>
+	<upstream>
+		<bugs-to>https://github.com/kbknapp/cargo-outdated/issues</bugs-to>
+		<remote-id type="github">kbknapp/cargo-outdated</remote-id>
+		<remote-id type="crates">cargo-outdated</remote-id>
+	</upstream>
+</pkgmetadata>
