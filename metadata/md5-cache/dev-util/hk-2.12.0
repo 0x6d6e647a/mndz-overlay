@@ -1,4 +1,4 @@
-BDEPEND=dev-build/cmake virtual/pkgconfig bash-completion? ( dev-util/usage ) fish-completion? ( dev-util/usage ) zsh-completion? ( dev-util/usage ) || ( >=dev-lang/rust-bin-1.94.0:* >=dev-lang/rust-1.94.0:* )
+BDEPEND=dev-build/cmake virtual/pkgconfig bash-completion? ( dev-util/usage ) fish-completion? ( dev-util/usage ) zsh-completion? ( dev-util/usage ) || ( >=dev-lang/rust-bin-1.94.1:* >=dev-lang/rust-1.94.1:* )
 DEFINED_PHASES=compile configure install setup test unpack
 DEPEND=sys-libs/zlib
 DESCRIPTION=Git hook manager and project linting tool
@@ -12,5 +12,5 @@ RDEPEND=sys-libs/zlib dev-vcs/git bash-completion? ( dev-util/usage ) fish-compl
 RESTRICT=!test? ( test )
 SLOT=0
 SRC_URI=https://github.com/jdx/hk/archive/refs/tags/v2.12.0.tar.gz -> hk-2.12.0.tar.gz https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/hk-2.12.0/hk-2.12.0-crates.tar.xz
-_eclasses_=cargo	f37054abdadccfe8287ecf965ef5748f	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	8a2beaaa77fb7c96f815f713b6920298	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	shell-completion	42587a281b8b546975e45fad82edcb50	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_eclasses_=cargo	f37054abdadccfe8287ecf965ef5748f	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	82f6599073a7368d12da31294f4a9aff	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	shell-completion	42587a281b8b546975e45fad82edcb50	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
 _md5_=fc7a277674f9f2a351d99f5e3676dcee
