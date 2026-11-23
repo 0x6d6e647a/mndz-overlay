@@ -13,5 +13,5 @@ REQUIRED_USE=!system-openssl? ( !system-libcurl !system-libgit2 !system-libssh2 
 RESTRICT=!test? ( test )
 SLOT=0
 SRC_URI=https://crates.io/api/v1/crates/cargo-outdated/0.19.0/download -> cargo-outdated-0.19.0.crate https://github.com/0x6d6e647a/mndz-overlay-assets/releases/download/cargo-outdated-0.19.0/cargo-outdated-0.19.0-crates.tar.xz
-_eclasses_=cargo	f37054abdadccfe8287ecf965ef5748f	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	8a2beaaa77fb7c96f815f713b6920298	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
+_eclasses_=cargo	f37054abdadccfe8287ecf965ef5748f	flag-o-matic	fd3558f73f6503093adee69adf41020d	multiprocessing	45d0620f25c2f063ad6276ecd9ed9399	rust	d2da4aa614adc34eea872ca9a6173d0a	rust-toolchain	76468983281b0a7fc167ca224f84ecfd	toolchain-funcs	58a918e3a42d0156f010dcfd43725be5
 _md5_=cb369c54d884e487002c172332dbbcd0
