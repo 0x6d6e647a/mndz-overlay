@@ -9,7 +9,7 @@ DESCRIPTION="Grok Bot desktop agent (prebuilt binary)"
 HOMEPAGE="https://x.ai/bot"
 
 # Single assignment. overlay-manager rewrites this on a GitMv bump.
-GROK_BOT_COMMIT="a5927fa2ba82336a29f9343babd28b4c903abbb2"
+GROK_BOT_COMMIT="bfb372966cec77c6ec2750957965f2a2268da17d"
 
 SRC_URI="
 	amd64? ( https://downloads.cursor.com/grokbot/stable/${GROK_BOT_COMMIT}/linux/x64/grok-bot_${PV}_amd64.deb )
