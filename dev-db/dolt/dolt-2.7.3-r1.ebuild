@@ -6,6 +6,8 @@ EAPI=8
 inherit go-module
 
 BDEPEND=">=dev-lang/go-1.27.3:="
+RDEPEND="dev-libs/icu:="
+DEPEND="${RDEPEND}"
 
 DESCRIPTION="Dolt – Git for Data"
 HOMEPAGE="https://github.com/dolthub/dolt"
