@@ -269,6 +269,8 @@ EOF
   t)
 
 (defun stash-dump-source-root (&optional source-root)
+  ;; Resolve temporary storage from the booting process, not Portage's TMPDIR.
+  (setf uiop:*temporary-directory* nil)
   (setf *dump-source-root*
         (canonicalize-root
          (or source-root
@@ -508,42 +510,39 @@ QLOT_00_FHS
 	cp -a "${sandbox_root}/build/cl-exec-sandbox-helper" \
 		"${T}/natives/cl-exec-sandbox-helper" || die
 
-	# --- Prune uninstalled tracked files before fabricating git ---
-	# HEAD must match the installed share tracked set.
-	rm -rf .github nix server tests || die
-	rm -f flake.nix flake.lock || die
+	# Select the source payload once. src_install exports the committed index.
+	rm -rf .github nix server tests native checks emacs || die
+	rm -f .gitattributes flake.nix flake.lock cheque.sexp sbcl-windows-releases.sha256 || die
 	rm -f bin/autolith-release || die
+	find bin -mindepth 1 -maxdepth 1 ! -name autolith ! -name autolith-active \
+		! -name autolith-runtime ! -name autolith-search-worker -delete || die
 	rm -f script/install script/bootstrap script/bootstrap.lisp \
 		script/qlot-install.lisp script/build-fff script/build-fff.lisp || die
 	rm -f sbcl-source.sha256 AGENTS.md AUTOLITH.org || die
-	rm -rf native/fff || die
-	rmdir native 2>/dev/null || true
-	# Keep remaining script/ (runtime-requirement, build-sandbox, check*,
-	# image builders). Those files are loaded or hashed into cores.
-	# Omit human-only docs; keep prompt templates when present. Do not rm -rf docs.
-	if [[ -d docs ]]; then
-		local doc
-		for doc in docs/* docs/.[!.]*; do
-			[[ -e ${doc} ]] || continue
-			case ${doc#docs/} in
-			system-prompt.org | request-context.org) ;;
-			*) rm -rf "${doc}" || die ;;
-			esac
-		done
-	fi
+	find docs -mindepth 1 -maxdepth 1 ! -name onboarding-sources.org \
+		! -name system-prompt.org ! -name request-context.org -exec rm -rf -- {} + || die
+	cp "${FILESDIR}/gentoo-bootstrap" script/bootstrap || die
+	chmod 0755 script/bootstrap || die
 
-	# --- Fabricate git identity for recovery/active provenance ---
 	einfo "Fabricating git provenance for image builds…"
-	if [[ ! -d .git ]]; then
-		git init --quiet --initial-branch=master . || die
-		git config user.name "Autolith Gentoo build" || die
-		git config user.email "portage@localhost" || die
-		git config gc.auto 0 || die
-		git add --all || die
-		GIT_AUTHOR_DATE='2000-01-01T00:00:00Z' \
-			GIT_COMMITTER_DATE='2000-01-01T00:00:00Z' \
-			git commit --quiet --message "Autolith ${PV} Portage source" || die
-	fi
+	git init --quiet --initial-branch=master . || die
+	git config user.name "Autolith Gentoo build" || die
+	git config user.email "portage@localhost" || die
+	git config gc.auto 0 || die
+	printf '%s\n' '/.qlot/' '/sbcl-source/' >> .git/info/exclude || die
+
+	local -a payload=(
+		.gitignore LICENSE README.org VERSION autolith.asd bin docs qlfile
+		qlfile.lock recovery sbcl.version script src
+	)
+	local optional
+	for optional in sbcl-minimum.version sbcl-source-releases.sha256; do
+		[[ ! -f ${optional} ]] || payload+=( "${optional}" )
+	done
+	git add --force -- "${payload[@]}" || die
+	GIT_AUTHOR_DATE='2000-01-01T00:00:00Z' \
+		GIT_COMMITTER_DATE='2000-01-01T00:00:00Z' \
+		git commit --quiet --message "Autolith ${PV} Portage source" || die
 	git gc --quiet --prune=now || die
 	rm -f .git/hooks/*.sample || die
 	rm -f .git/index || die
@@ -646,33 +645,12 @@ src_install() {
 		fi
 	)
 
-	# Explicit keep list (not cp -a of ${S}).
-	cp -a src autolith.asd qlfile qlfile.lock sbcl.version \
-		"${sharedir}/" || die
-	[[ -f .gitignore ]] && { cp -a .gitignore "${sharedir}/" || die; }
-	[[ -f LICENSE ]] && { cp -a LICENSE "${sharedir}/" || die; }
-	[[ -f README.org ]] && { cp -a README.org "${sharedir}/" || die; }
-	[[ -f sbcl-source-releases.sha256 ]] && {
-		cp -a sbcl-source-releases.sha256 "${sharedir}/" || die
-	}
-	cp -a .qlot "${sharedir}/" || die
-	cp -a .git "${sharedir}/" || die
+	# Export the same contents and modes used to build the cores.
+	git -c safe.directory="${S}" checkout-index --all --prefix="${sharedir}/" ||
+		die "could not stage tracked Autolith payload"
+	cp -a .qlot .git "${sharedir}/" || die
 	keepdir "${autolith_share}/.git/refs"
 	keepdir "${autolith_share}/.git/refs/heads"
-	cp -a recovery "${sharedir}/" || die
-	mkdir -p "${sharedir}/bin" || die
-	cp -a bin/autolith bin/autolith-active bin/autolith-runtime \
-		bin/autolith-search-worker "${sharedir}/bin/" || die
-	cp -a script "${sharedir}/" || die
-	if [[ -f docs/system-prompt.org || -f docs/request-context.org ]]; then
-		mkdir -p "${sharedir}/docs" || die
-		[[ -f docs/system-prompt.org ]] && {
-			cp -a docs/system-prompt.org "${sharedir}/docs/" || die
-		}
-		[[ -f docs/request-context.org ]] && {
-			cp -a docs/request-context.org "${sharedir}/docs/" || die
-		}
-	fi
 
 	# Architecture-specific natives
 	insinto "${autolith_libdir}/lib"
@@ -697,13 +675,12 @@ src_install() {
 
 	# /usr/bin/autolith wrapper (two dests)
 	local wrapper="${T}/autolith-wrapper"
+	local runtime_env="${T}/autolith-runtime-env"
 	# Expand EPREFIX at install time (wrapper runs with set -u; EPREFIX is not
 	# defined in the user's shell). Runtime overrides still use \${VAR:-...}.
-	cat > "${wrapper}" <<EOF || die
+	cat > "${runtime_env}" <<EOF || die
 #!/usr/bin/env bash
 # Gentoo mndz-overlay wrapper for Autolith ${PV}
-set -euo pipefail
-
 share="${EPREFIX}${autolith_share}"
 lib="${EPREFIX}${autolith_libdir}"
 export AUTOLITH_SBCL="\${AUTOLITH_SBCL:-${EPREFIX}/usr/bin/sbcl}"
@@ -716,15 +693,43 @@ export AUTOLITH_RECOVERY_CORE="\${AUTOLITH_RECOVERY_CORE:-\${lib}/cores/recovery
 export AUTOLITH_ACTIVE_CORE="\${AUTOLITH_ACTIVE_CORE:-\${lib}/cores/active/autolith-active.core}"
 export AUTOLITH_INSTALLATION_KIND="\${AUTOLITH_INSTALLATION_KIND:-gentoo}"
 
-# Allow provenance git reads from the share tree.
-export GIT_CONFIG_COUNT=1
+# Allow Git status and trailing-slash clones from the packaged source.
+export GIT_CONFIG_COUNT=2
 export GIT_CONFIG_KEY_0=safe.directory
 export GIT_CONFIG_VALUE_0="\${share}"
+export GIT_CONFIG_KEY_1=safe.directory
+export GIT_CONFIG_VALUE_1="\${share}/.git"
 export GIT_OPTIONAL_LOCKS=0
 
+EOF
+	insinto "${autolith_libdir}"
+	doins "${runtime_env}"
+
+	cat > "${wrapper}" <<EOF || die
+#!/usr/bin/env bash
+set -euo pipefail
+source "${EPREFIX}${autolith_libdir}/autolith-runtime-env"
 exec bash "\${share}/bin/autolith" "\$@"
 EOF
 	newbin "${wrapper}" autolith
+
+	insinto "${autolith_libdir}/libexec"
+	doins "${FILESDIR}/validate-install.lisp" "${FILESDIR}/smoke-registry.lisp"
+	exeinto "${autolith_libdir}/libexec"
+	doexe "${FILESDIR}/installed-check"
+
+	local staged_status packaged_head
+	packaged_head=$(git -c safe.directory="${sharedir}" -C "${sharedir}" rev-parse HEAD) || die
+	sbcl --noinform --no-userinit --no-sysinit --script "${FILESDIR}/validate-install.lisp" \
+		"${sharedir}/" "${ED}${autolith_libdir}/cores/" "${packaged_head}" ||
+		die "Autolith staged runtime validation failed"
+
+	staged_status=$(git -c safe.directory="${sharedir}" -C "${sharedir}" status --porcelain --untracked-files=all) ||
+		die "could not inspect staged Autolith provenance"
+	[[ -z ${staged_status} ]] || die "staged Autolith Git tree is dirty: ${staged_status}"
+	# Leave the packaged index stat-less after checking the staged tree.
+	rm -f "${sharedir}/.git/index" || die
+	git -c safe.directory="${sharedir}" -C "${sharedir}" read-tree HEAD || die
 
 	dodoc README.org LICENSE || true
 }
@@ -759,4 +764,19 @@ src_test() {
 		|| die "offline autolith load / version check failed"
 
 	einfo "src_test: offline load of autolith ${PV} succeeded (SBCL ${host_pv})"
+}
+
+# shellcheck disable=SC2329
+pkg_postinst() {
+	[[ ${ROOT} == / ]] || return 0
+	local runtime_env="${EPREFIX}/usr/$(get_libdir)/autolith/autolith-runtime-env"
+	if ! (
+		unset AUTOLITH_SBCL AUTOLITH_ACTIVE_CORE
+		source "${runtime_env}" &&
+			timeout 30 "${AUTOLITH_SBCL}" --noinform --core "${AUTOLITH_ACTIVE_CORE}" \
+				--end-runtime-options "${share}" --autolith-internal-active-image-probe
+	) </dev/null >/dev/null 2>&1; then
+		ewarn "The installed Autolith active core failed its probe."
+		ewarn "Re-emerge dev-util/autolith to rebuild the Gentoo Autolith images."
+	fi
 }

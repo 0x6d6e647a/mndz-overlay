@@ -1,0 +1,87 @@
+#!/bin/bash
+set -euo pipefail
+
+libexec=$(dirname -- "$(realpath -- "$0")")
+source "$libexec/../autolith-runtime-env"
+
+test "$(id -u)" -ne 0
+export HOME=$(mktemp -d)
+trap 'rm -rf -- "$HOME"' EXIT
+export XDG_CACHE_HOME="$HOME/cache" XDG_CONFIG_HOME="$HOME/config"
+export XDG_DATA_HOME="$HOME/data" XDG_STATE_HOME="$HOME/state"
+cd "$HOME"
+
+case "$1" in
+	active)
+		"$AUTOLITH_SBCL" --noinform --core "$AUTOLITH_ACTIVE_CORE" \
+			--end-runtime-options "$share" --autolith-internal-active-image-probe
+		;;
+	recovery)
+		"$AUTOLITH_SBCL" --noinform --core "$AUTOLITH_RECOVERY_CORE" \
+			--end-runtime-options "$share" --probe
+		;;
+	inputs)
+		"$AUTOLITH_SBCL" --script "$libexec/validate-install.lisp" "$share/" \
+			"$lib/cores/" "$(git -C "$share" rev-parse HEAD)"
+		;;
+	runtime-data)
+		cd "$share"
+		"$AUTOLITH_SBCL" --noinform --non-interactive --eval '(require :asdf)' \
+			--eval '(asdf:load-asd (merge-pathnames "autolith.asd" (uiop:getcwd)))' \
+			--eval '(format t "~&~A~%" (asdf:component-version (asdf:find-system :autolith)))'
+		test -r "$share/docs/onboarding-sources.org"
+		test -r "$share/docs/system-prompt.org"
+		test -r "$share/docs/request-context.org"
+		;;
+	git-parity)
+		status=$(git -C "$share" status --porcelain --untracked-files=all)
+		if [[ -n $status ]]; then
+			printf '%s\n' "$status" >&2
+			exit 1
+		fi
+		;;
+	clone)
+		test "$(stat -c %u "$share/.git")" -eq 0
+		git clone --no-checkout --no-hardlinks "$share/" "$HOME/clone"
+		test "$(git -C "$HOME/clone" rev-parse HEAD)" = "$(git -C "$share" rev-parse HEAD)"
+		;;
+	forced-recovery)
+		export SMOKE_REAL_SBCL="$AUTOLITH_SBCL"
+		cat > "$HOME/sbcl-shim" <<'SHIM'
+#!/bin/bash
+probe=false
+active=false
+previous=
+for argument; do
+	if [[ $previous == --core && $argument == "$AUTOLITH_ACTIVE_CORE" ]]; then
+		active=true
+	fi
+	[[ $argument != --autolith-internal-active-image-probe ]] || probe=true
+	previous=$argument
+done
+if "$active" && ! "$probe"; then
+	printf '%s\n' 'Injected active execution failure (86)' >&2
+	exit 86
+fi
+exec "$SMOKE_REAL_SBCL" "$@"
+SHIM
+		chmod +x "$HOME/sbcl-shim"
+		AUTOLITH_SBCL="$HOME/sbcl-shim" autolith --version </dev/null
+		commit=$(git -C "$share" rev-parse HEAD)
+		set -- "$XDG_DATA_HOME"/autolith/recovery-worktrees/*/
+		test "$#" -eq 1
+		test "$(git -C "$1" rev-parse HEAD)" = "$commit"
+		status=$(git -C "$1" status --porcelain --untracked-files=all)
+		test -z "$status"
+		printf 'Pristine checkout at %s\n' "$commit"
+		;;
+	registry)
+		mkdir "$HOME/workspace"
+		touch "$HOME/workspace/example.txt"
+		"$AUTOLITH_SBCL" --script "$libexec/smoke-registry.lisp" \
+			"$share/" "${2:-$share/}" "$HOME/workspace/"
+		;;
+	*)
+		exit 64
+		;;
+esac
